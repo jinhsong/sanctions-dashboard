@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>글로벌 제재 지도</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+:root {
+  --bg: #080a0f;
+  --surface: #0d1017;
+  --surface2: #131820;
+  --border: #1a2035;
+  --border2: #243050;
+  --text: #d4dae8;
+  --text2: #6b7a99;
+  --text3: #2e3a55;
+  --un-color: #3b9eff;
+  --us-color: #ff4f4f;
+  --both-color: #c44dff;
+  --neutral: #1a2240;
+  --ocean: #07090e;
+  --accent: #00d4ff;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Noto Sans KR', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(8,10,15,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em;
+}
+.logo-box {
+  width: 28px; height: 28px;
+  border: 1.5px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--accent); font-weight: 600;
+  position: relative; overflow: hidden;
+}
+.logo-box::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--accent); opacity: 0.08;
+}
+.logo span { color: var(--accent); }
+
+.header-right {
+  display: flex; align-items: center; gap: 20px;
+}
+
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text2); letter-spacing: 0.1em;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #3bff8a;
+  animation: livepulse 2s infinite;
+}
+@keyframes livepulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(59,255,138,0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(59,255,138,0); }
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: flex; height: 100vh; padding-top: 56px;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 300px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column;
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.sidebar-section { padding: 20px; border-bottom: 1px solid var(--border); }
+
+.sec-label {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.2em; color: var(--text3);
+  text-transform: uppercase; margin-bottom: 14px;
+}
+
+/* Stat cards */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 12px; border-radius: 2px;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); }
+.stat-num {
+  font-family: var(--mono); font-size: 22px; font-weight: 600;
+  line-height: 1; margin-bottom: 4px;
+}
+.stat-label { font-size: 10px; color: var(--text2); }
+
+/* Toggle filter */
+.filter-group { display: flex; flex-direction: column; gap: 6px; }
+
+.filter-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  cursor: pointer; border-radius: 2px;
+  transition: all 0.2s;
+  font-family: var(--sans); font-size: 12px; color: var(--text2);
+  width: 100%; text-align: left;
+}
+.filter-btn.active { color: var(--text); border-color: var(--border2); }
+.filter-btn.active.un { border-left: 3px solid var(--un-color); }
+.filter-btn.active.us { border-left: 3px solid var(--us-color); }
+.filter-btn.active.both { border-left: 3px solid var(--both-color); }
+
+.filter-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.dot-un { background: var(--un-color); box-shadow: 0 0 8px rgba(59,158,255,0.6); }
+.dot-us { background: var(--us-color); box-shadow: 0 0 8px rgba(255,79,79,0.6); }
+.dot-both { background: var(--both-color); box-shadow: 0 0 8px rgba(196,77,255,0.6); }
+.dot-neutral { background: var(--text3); }
+
+.filter-count {
+  margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--text2);
+}
+
+/* Country list */
+.country-list { display: flex; flex-direction: column; gap: 0; }
+.country-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: all 0.15s;
+  font-size: 12px; color: var(--text2);
+}
+.country-item:last-child { border-bottom: none; }
+.country-item:hover { color: var(--text); padding-left: 4px; }
+.country-item.selected { color: var(--text); background: rgba(255,255,255,0.02); padding-left: 4px; }
+.country-flag { font-size: 14px; }
+.country-badges { margin-left: auto; display: flex; gap: 3px; }
+.badge {
+  padding: 1px 5px; font-size: 8px; font-family: var(--mono);
+  letter-spacing: 0.05em; border-radius: 1px;
+}
+.badge-un { background: rgba(59,158,255,0.15); color: var(--un-color); border: 1px solid rgba(59,158,255,0.3); }
+.badge-us { background: rgba(255,79,79,0.15); color: var(--us-color); border: 1px solid rgba(255,79,79,0.3); }
+
+/* Detail panel */
+.detail-panel {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+.detail-inner { padding: 16px; }
+.detail-country-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.detail-flag { font-size: 24px; margin-bottom: 8px; display: block; }
+.detail-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-key { color: var(--text2); font-family: var(--mono); font-size: 10px; }
+.detail-val { color: var(--text); text-align: right; max-width: 160px; line-height: 1.4; }
+.detail-empty {
+  padding: 24px 16px; text-align: center;
+  color: var(--text3); font-size: 12px; font-family: var(--mono);
+}
+
+/* ── MAP AREA ── */
+.map-area {
+  flex: 1; position: relative; overflow: hidden;
+  background: var(--ocean);
+}
+
+#map-svg {
+  width: 100%; height: 100%;
+  cursor: grab;
+}
+#map-svg:active { cursor: grabbing; }
+
+.country-path {
+  stroke: #0d1825; stroke-width: 0.5;
+  transition: opacity 0.2s;
+}
+.country-path.un-sanction { fill: var(--un-color); opacity: 0.75; }
+.country-path.us-sanction { fill: var(--us-color); opacity: 0.75; }
+.country-path.both-sanction { fill: var(--both-color); opacity: 0.8; }
+.country-path.neutral { fill: var(--neutral); opacity: 1; }
+
+.country-path:hover { opacity: 1 !important; stroke: rgba(255,255,255,0.3); stroke-width: 1; }
+.country-path.highlighted { opacity: 1 !important; stroke: #fff; stroke-width: 1.5; }
+
+/* Map overlay UI */
+.map-legend {
+  position: absolute; bottom: 24px; left: 24px;
+  background: rgba(8,10,15,0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+}
+.legend-title {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
+  color: var(--text3); text-transform: uppercase; margin-bottom: 10px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; color: var(--text2);
+  margin-bottom: 6px;
+}
+.legend-item:last-child { margin-bottom: 0; }
+.legend-swatch {
+  width: 12px; height: 12px; border-radius: 1px; flex-shrink: 0;
+}
+
+.map-controls {
+  position: absolute; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.map-btn {
+  width: 32px; height: 32px;
+  background: rgba(8,10,15,0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  color: var(--text2); font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; font-family: var(--mono);
+}
+.map-btn:hover { color: var(--text); border-color: var(--border2); }
+
+/* Tooltip */
+.tooltip {
+  position: absolute; pointer-events: none;
+  background: rgba(8,10,15,0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border2);
+  padding: 10px 14px;
+  display: none; z-index: 300;
+  max-width: 220px;
+}
+.tooltip.show { display: block; }
+.tt-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.tt-badges { display: flex; gap: 4px; margin-bottom: 6px; }
+.tt-desc { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+/* Top bar on map */
+.map-topbar {
+  position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  background: rgba(8,10,15,0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  padding: 8px 20px;
+  font-family: var(--mono); font-size: 11px; color: var(--text2);
+  white-space: nowrap;
+}
+.map-topbar span { color: var(--text); }
+
+/* view toggle */
+.view-toggle {
+  position: absolute; top: 16px; right: 16px;
+  display: flex; gap: 2px;
+}
+.vt-btn {
+  padding: 6px 14px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  background: rgba(8,10,15,0.88); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
+}
+.vt-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(0,212,255,0.05); }
+
+@media (max-width: 768px) {
+  .sidebar { width: 240px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-box">SX</div>
+    SANCTION<span>MAP</span>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      GLOBAL SANCTIONS TRACKER
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sec-label">// 제재 현황 통계</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--un-color)" id="un-count">14</div>
+          <div class="stat-label">🇺🇳 UN 제재국</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color:var(--us-color)" id="us-count">20</div>
+          <div class="stat-label">🇺🇸 미국 제재국</div>
+        </div>
+        <div class="stat-card" style="grid-column:span 2">
+          <div class="stat-num" style="color:var(--both-color)" id="both-count">12</div>
+          <div class="stat-label">🔴 UN + 미국 동시 제재국</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sec-label">// 필터</div>
+      <div class="filter-group">
+        <button class="filter-btn active both" id="btn-both" onclick="setFilter('both')">
+          <div class="filter-dot dot-both"></div>
+          UN + 미국 동시 제재
+          <span class="filter-count" id="fc-both">12</span>
+        </button>
+        <button class="filter-btn active un" id="btn-un" onclick="setFilter('un')">
+          <div class="filter-dot dot-un"></div>
+          UN 단독 제재
+          <span class="filter-count" id="fc-un">2</span>
+        </button>
+        <button class="filter-btn active us" id="btn-us" onclick="setFilter('us')">
+          <div class="filter-dot dot-us"></div>
+          미국 단독 제재
+          <span class="filter-count" id="fc-us">8</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="flex:1; overflow-y:auto;">
+      <div class="sec-label">// 제재 국가 목록</div>
+      <div class="country-list" id="country-list"></div>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+      <div class="detail-empty">지도 또는 목록에서 국가를 선택하세요</div>
+    </div>
+
+  </div>
+
+  <!-- MAP -->
+  <div class="map-area" id="map-area">
+    <div class="map-topbar">
+      총 <span id="visible-count">22</span>개국 제재 적용 중 &nbsp;·&nbsp; 드래그로 이동, 스크롤로 확대
+    </div>
+
+    <div class="view-toggle">
+      <button class="vt-btn active" id="vt-all" onclick="setView('all')">전체</button>
+      <button class="vt-btn" id="vt-un" onclick="setView('un_only')">UN만</button>
+      <button class="vt-btn" id="vt-us" onclick="setView('us_only')">미국만</button>
+    </div>
+
+    <svg id="map-svg"></svg>
+
+    <div class="map-legend">
+      <div class="legend-title">// 범례</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--both-color)"></div>UN + 미국 동시 제재</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--un-color)"></div>UN 단독 제재</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--us-color)"></div>미국 단독 제재</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--neutral)"></div>비제재국</div>
+    </div>
+
+    <div class="map-controls">
+      <button class="map-btn" onclick="zoomIn()">+</button>
+      <button class="map-btn" onclick="zoomOut()">−</button>
+      <button class="map-btn" onclick="resetZoom()" style="font-size:10px">⌂</button>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+      <div class="tt-name" id="tt-name"></div>
+      <div class="tt-badges" id="tt-badges"></div>
+      <div class="tt-desc" id="tt-desc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SANCTIONS DATA ──
+const sanctionData = {
+  // UN + US both
+  "PRK": { name:"북한", flag:"🇰🇵", un:true, us:true, severity:"critical",
+    unDesc:"결의 1718·1874·2087·2094·2270·2321·2356·2371·2375·2397호 — 핵·미사일 포괄 제재",
+    usDesc:"DPRK 포괄 제재 (OFAC) — 모든 거래 원칙 금지, 2차 제재 위험",
+    since:"2006", sectors:["핵·미사일","금융","에너지","무역","노동력"] },
+  "IRN": { name:"이란", flag:"🇮🇷", un:true, us:true, severity:"critical",
+    unDesc:"결의 1737·1747·1803·1929호 — 핵·미사일 확산 우려",
+    usDesc:"IRAN 포괄 제재 — 석유·가스, 금융, 방산, 운송",
+    since:"2006", sectors:["핵·미사일","석유·가스","금융","방산"] },
+  "SDN": { name:"수단", flag:"🇸🇩", un:true, us:true, severity:"high",
+    unDesc:"결의 1556·1564·1591호 — 다르푸르 관련 무기 금수",
+    usDesc:"Sudan 제재 — 정부 인사 자산동결",
+    since:"2004", sectors:["무기금수","금융"] },
+  "SOM": { name:"소말리아", flag:"🇸🇴", un:true, us:true, severity:"high",
+    unDesc:"결의 733·751·1844호 — 무기 금수, 알샤바브 관련",
+    usDesc:"Somalia 제재 — 테러 연계 단체",
+    since:"1992", sectors:["무기금수","테러"] },
+  "COD": { name:"콩고(DRC)", flag:"🇨🇩", un:true, us:true, severity:"high",
+    unDesc:"결의 1533·1596·1698호 — 동부 분쟁 무기 금수",
+    usDesc:"DRC 제재 — 인권침해 관련 개인",
+    since:"2003", sectors:["무기금수","인권"] },
+  "CAF": { name:"중앙아프리카공화국", flag:"🇨🇫", un:true, us:true, severity:"high",
+    unDesc:"결의 2127·2134호 — 무기 금수",
+    usDesc:"CAR 제재 — 분쟁 관련 무장세력",
+    since:"2013", sectors:["무기금수"] },
+  "MLI": { name:"말리", flag:"🇲🇱", un:true, us:true, severity:"medium",
+    unDesc:"결의 2374호 — 평화협정 훼손 행위자 제재",
+    usDesc:"Mali 제재 — 쿠데타 군사정부 인사",
+    since:"2017", sectors:["무기금수","금융"] },
+  "GNB": { name:"기니비사우", flag:"🇬🇼", un:true, us:true, severity:"medium",
+    unDesc:"결의 2048호 — 쿠데타 관련 여행 금지",
+    usDesc:"기니비사우 제재 — 마약 밀매 관련",
+    since:"2012", sectors:["여행금지","마약"] },
+  "LBY": { name:"리비아", flag:"🇱🇾", un:true, us:true, severity:"high",
+    unDesc:"결의 1970·2009·2040·2174호 — 무기 금수, 카다피 세력",
+    usDesc:"Libya 제재 — 무장세력, 유전 방해 세력",
+    since:"2011", sectors:["무기금수","금융","에너지"] },
+  "YEM": { name:"예멘", flag:"🇾🇪", un:true, us:true, severity:"high",
+    unDesc:"결의 2140·2216호 — 후티 반군 자산동결·무기 금수",
+    usDesc:"Yemen 제재 — 후티·전직 대통령 세력",
+    since:"2014", sectors:["무기금수","금융","테러"] },
+  "SSD": { name:"남수단", flag:"🇸🇸", un:true, us:true, severity:"high",
+    unDesc:"결의 2206·2290·2353호 — 분쟁 관련 무기 금수",
+    usDesc:"South Sudan 제재 — 내전 당사자",
+    since:"2015", sectors:["무기금수","금융"] },
+  "HTI": { name:"아이티", flag:"🇭🇹", un:true, us:true, severity:"medium",
+    unDesc:"결의 2653호 — 갱 두목 지미즈 등 개인 제재",
+    usDesc:"Haiti 제재 — 갱단 지도자, 부패 정치인",
+    since:"2022", sectors:["금융","여행금지"] },
+  // UN only
+  "GIN": { name:"기니", flag:"🇬🇳", un:true, us:false, severity:"medium",
+    unDesc:"결의 1819호 (완화됨) — 과거 무기 금수",
+    usDesc:null,
+    since:"2008", sectors:["무기금수"] },
+  "ERI": { name:"에리트레아", flag:"🇪🇷", un:true, us:false, severity:"medium",
+    unDesc:"결의 1907·2023호 — 소말리아 개입 관련 무기 금수",
+    usDesc:null,
+    since:"2009", sectors:["무기금수"] },
+  // US only
+  "CUB": { name:"쿠바", flag:"🇨🇺", un:false, us:true, severity:"high",
+    unDesc:null,
+    usDesc:"Cuba 포괄 제재 (OFAC) — 1962년 이래 무역 금수, 여행 제한",
+    since:"1962", sectors:["포괄금수","금융","무역"] },
+  "SYR": { name:"시리아", flag:"🇸🇾", un:false, us:true, severity:"critical",
+    unDesc:null,
+    usDesc:"Syria 포괄 제재 — 아사드 정권, 에너지, 금융, 방산",
+    since:"2004", sectors:["포괄금수","에너지","금융"] },
+  "RUS": { name:"러시아", flag:"🇷🇺", un:false, us:true, severity:"critical",
+    unDesc:null,
+    usDesc:"Russia 제재 — 2022년 우크라이나 침공 후 급격 확대. 금융·에너지·방산 포괄",
+    since:"2014", sectors:["금융","에너지","방산","수출통제"] },
+  "BLR": { name:"벨라루스", flag:"🇧🇾", un:false, us:true, severity:"medium",
+    unDesc:null,
+    usDesc:"Belarus 제재 — 루카셴코 정권, 민주주의 탄압 관련",
+    since:"2006", sectors:["금융","여행금지"] },
+  "MMR": { name:"미얀마", flag:"🇲🇲", un:false, us:true, severity:"high",
+    unDesc:null,
+    usDesc:"Burma 제재 — 2021년 쿠데타 군부 및 군 소유기업",
+    since:"1997", sectors:["군부인사","에너지","금융"] },
+  "VEN": { name:"베네수엘라", flag:"🇻🇪", un:false, us:true, severity:"high",
+    unDesc:null,
+    usDesc:"Venezuela 제재 — 마두로 정권, 석유 부문 제재",
+    since:"2015", sectors:["석유","금융","정권인사"] },
+  "NIC": { name:"니카라과", flag:"🇳🇮", un:false, us:true, severity:"medium",
+    unDesc:null,
+    usDesc:"Nicaragua 제재 — 오르테가 정권, 선거 부정",
+    since:"2018", sectors:["금융","정권인사"] },
+  "ZWE": { name:"짐바브웨", flag:"🇿🇼", un:false, us:true, severity:"medium",
+    unDesc:null,
+    usDesc:"Zimbabwe 제재 — 무가베 전 대통령 세력, 인권침해",
+    since:"2003", sectors:["금융","여행금지"] },
+};
+
+// ISO Alpha-3 to country name (for D3 topojson)
+const iso3Map = {};
+Object.entries(sanctionData).forEach(([k,v]) => { iso3Map[k] = v; });
+
+// ── FILTER STATE ──
+let activeFilters = { both: true, un: true, us: true };
+let currentView = 'all'; // all, un_only, us_only
+let selectedCountry = null;
+
+function getCategory(d) {
+  if (!d) return 'neutral';
+  if (d.un && d.us) return 'both';
+  if (d.un) return 'un';
+  if (d.us) return 'us';
+  return 'neutral';
+}
+
+function isVisible(d) {
+  if (!d) return false;
+  const cat = getCategory(d);
+  if (currentView === 'un_only' && !d.un) return false;
+  if (currentView === 'us_only' && !d.us) return false;
+  if (cat === 'both' && !activeFilters.both) return false;
+  if (cat === 'un' && !activeFilters.un) return false;
+  if (cat === 'us' && !activeFilters.us) return false;
+  return true;
+}
+
+// ── BUILD SIDEBAR LIST ──
+function buildList() {
+  const list = document.getElementById('country-list');
+  const sorted = Object.entries(sanctionData).sort((a,b) => {
+    const catOrder = { both:0, un:1, us:2 };
+    return catOrder[getCategory(a[1])] - catOrder[getCategory(b[1])] || a[1].name.localeCompare(b[1].name, 'ko');
+  });
+
+  list.innerHTML = sorted.map(([iso, d]) => {
+    const cat = getCategory(d);
+    const vis = isVisible(d);
+    return `<div class="country-item${selectedCountry===iso?' selected':''}" 
+                 id="li-${iso}" 
+                 onclick="selectCountry('${iso}')"
+                 style="${vis?'':'opacity:0.25; pointer-events:none'}">
+      <span class="country-flag">${d.flag}</span>
+      <span>${d.name}</span>
+      <span class="country-badges">
+        ${d.un ? '<span class="badge badge-un">UN</span>' : ''}
+        ${d.us ? '<span class="badge badge-us">US</span>' : ''}
+      </span>
+    </div>`;
+  }).join('');
+
+  // Update counts
+  const total = Object.values(sanctionData);
+  const unCount = total.filter(d=>d.un).length;
+  const usCount = total.filter(d=>d.us).length;
+  const bothCount = total.filter(d=>d.un&&d.us).length;
+  const unOnly = total.filter(d=>d.un&&!d.us).length;
+  const usOnly = total.filter(d=>!d.un&&d.us).length;
+
+  document.getElementById('un-count').textContent = unCount;
+  document.getElementById('us-count').textContent = usCount;
+  document.getElementById('both-count').textContent = bothCount;
+  document.getElementById('fc-both').textContent = bothCount;
+  document.getElementById('fc-un').textContent = unOnly;
+  document.getElementById('fc-us').textContent = usOnly;
+
+  const visCount = total.filter(d=>isVisible(d)).length;
+  document.getElementById('visible-count').textContent = visCount;
+}
+
+function selectCountry(iso) {
+  selectedCountry = iso;
+  const d = sanctionData[iso];
+  if (!d) return;
+
+  // Update list highlight
+  document.querySelectorAll('.country-item').forEach(el => el.classList.remove('selected'));
+  const li = document.getElementById(`li-${iso}`);
+  if (li) li.classList.add('selected');
+
+  // Update map highlight
+  d3.selectAll('.country-path').classed('highlighted', false);
+  d3.select(`#c-${iso}`).classed('highlighted', true);
+
+  // Update detail panel
+  const panel = document.getElementById('detail-panel');
+  const cat = getCategory(d);
+  const catLabel = { both:'UN + 미국 동시 제재', un:'UN 단독 제재', us:'미국 단독 제재' }[cat];
+  const catColor = { both:'var(--both-color)', un:'var(--un-color)', us:'var(--us-color)' }[cat];
+
+  panel.innerHTML = `<div class="detail-inner">
+    <span class="detail-flag">${d.flag}</span>
+    <div class="detail-country-name">${d.name}</div>
+    <div style="font-size:10px; font-family:var(--mono); color:${catColor}; margin-bottom:12px">${catLabel}</div>
+    ${d.un ? `<div class="detail-row">
+      <div class="detail-key">🇺🇳 UN 제재</div>
+      <div class="detail-val" style="color:var(--un-color)">${d.unDesc}</div>
+    </div>` : ''}
+    ${d.us ? `<div class="detail-row">
+      <div class="detail-key">🇺🇸 미국 OFAC</div>
+      <div class="detail-val" style="color:var(--us-color)">${d.usDesc}</div>
+    </div>` : ''}
+    <div class="detail-row">
+      <div class="detail-key">최초 제재</div>
+      <div class="detail-val">${d.since}년</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-key">제재 분야</div>
+      <div class="detail-val">${d.sectors.join(', ')}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-key">위험 등급</div>
+      <div class="detail-val" style="color:${d.severity==='critical'?'var(--us-color)':d.severity==='high'?'#ff8c42':'var(--accent3)'}">
+        ${d.severity.toUpperCase()}
+      </div>
+    </div>
+  </div>`;
+}
+
+function setFilter(type) {
+  activeFilters[type] = !activeFilters[type];
+  const btn = document.getElementById(`btn-${type}`);
+  btn.classList.toggle('active', activeFilters[type]);
+  updateMapColors();
+  buildList();
+}
+
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`vt-${v==='all'?'all':v==='un_only'?'un':'us'}`).classList.add('active');
+  updateMapColors();
+  buildList();
+}
+
+// ── D3 MAP ──
+const svg = d3.select('#map-svg');
+let projection, path, zoom, g;
+
+function initMap() {
+  const W = document.getElementById('map-area').clientWidth;
+  const H = document.getElementById('map-area').clientHeight;
+
+  projection = d3.geoNaturalEarth1()
+    .scale(W / 6.1)
+    .translate([W / 2, H / 2]);
+
+  path = d3.geoPath().projection(projection);
+
+  zoom = d3.zoom()
+    .scaleExtent([0.5, 10])
+    .on('zoom', (event) => { g.attr('transform', event.transform); });
+
+  svg.attr('width', W).attr('height', H).call(zoom);
+
+  // Ocean background
+  svg.append('rect')
+    .attr('width', W).attr('height', H)
+    .attr('fill', '#07090e');
+
+  g = svg.append('g');
+
+  // Graticule
+  const graticule = d3.geoGraticule()();
+  g.append('path')
+    .datum(graticule)
+    .attr('d', path)
+    .attr('fill', 'none')
+    .attr('stroke', '#0d1825')
+    .attr('stroke-width', 0.4);
+
+  loadMap();
+}
+
+function loadMap() {
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(r => r.json())
+    .then(world => {
+      const countries = topojson.feature(world, world.objects.countries);
+
+      // ISO numeric to alpha3 mapping (partial, key sanctioned countries)
+      const numToAlpha3 = {
+        "408":"PRK","364":"IRN","729":"SDN","706":"SOM","180":"COD",
+        "140":"CAF","466":"MLI","624":"GNB","434":"LBY","887":"YEM",
+        "728":"SSD","332":"HTI","324":"GIN","232":"ERI","192":"CUB",
+        "760":"SYR","643":"RUS","112":"BLR","104":"MMR","862":"VEN",
+        "558":"NIC","716":"ZWE"
+      };
+
+      const tooltip = document.getElementById('tooltip');
+
+      g.selectAll('.country-path')
+        .data(countries.features)
+        .enter().append('path')
+        .attr('class', d => {
+          const iso3 = numToAlpha3[d.id];
+          const sd = iso3 ? sanctionData[iso3] : null;
+          const cat = getCategory(sd);
+          return `country-path ${cat}-sanction`;
+        })
+        .attr('id', d => {
+          const iso3 = numToAlpha3[d.id];
+          return iso3 ? `c-${iso3}` : null;
+        })
+        .attr('d', path)
+        .attr('data-iso', d => numToAlpha3[d.id] || '')
+        .on('mousemove', function(event, d) {
+          const iso3 = numToAlpha3[d.id];
+          const sd = iso3 ? sanctionData[iso3] : null;
+          if (!sd) { tooltip.classList.remove('show'); return; }
+
+          const cat = getCategory(sd);
+          const catColor = { both:'var(--both-color)', un:'var(--un-color)', us:'var(--us-color)' }[cat];
+
+          document.getElementById('tt-name').textContent = `${sd.flag} ${sd.name}`;
+          document.getElementById('tt-badges').innerHTML =
+            `${sd.un ? '<span class="badge badge-un">UN</span>' : ''}${sd.us ? '<span class="badge badge-us">US</span>' : ''}`;
+          document.getElementById('tt-desc').innerHTML =
+            `<span style="color:${catColor}">${
+              cat==='both' ? 'UN + 미국 동시 제재' : cat==='un' ? 'UN 단독 제재' : '미국 단독 제재'
+            }</span><br>${sd.sectors.join(' · ')}`;
+
+          const rect = document.getElementById('map-area').getBoundingClientRect();
+          let x = event.clientX - rect.left + 14;
+          let y = event.clientY - rect.top - 10;
+          if (x + 230 > rect.width) x -= 244;
+          tooltip.style.left = x + 'px';
+          tooltip.style.top = y + 'px';
+          tooltip.classList.add('show');
+        })
+        .on('mouseleave', function() { tooltip.classList.remove('show'); })
+        .on('click', function(event, d) {
+          const iso3 = numToAlpha3[d.id];
+          if (iso3 && sanctionData[iso3]) selectCountry(iso3);
+        });
+
+      updateMapColors();
+    })
+    .catch(() => {
+      // Fallback message
+      g.append('text')
+        .attr('x', 100).attr('y', 100)
+        .attr('fill', '#6b7a99')
+        .attr('font-size', 14)
+        .text('지도 데이터 로드 중 오류 — 인터넷 연결을 확인하세요');
+    });
+}
+
+function updateMapColors() {
+  const numToAlpha3 = {
+    "408":"PRK","364":"IRN","729":"SDN","706":"SOM","180":"COD",
+    "140":"CAF","466":"MLI","624":"GNB","434":"LBY","887":"YEM",
+    "728":"SSD","332":"HTI","324":"GIN","232":"ERI","192":"CUB",
+    "760":"SYR","643":"RUS","112":"BLR","104":"MMR","862":"VEN",
+    "558":"NIC","716":"ZWE"
+  };
+
+  d3.selectAll('.country-path').each(function(d) {
+    const iso3 = d ? numToAlpha3[d.id] : null;
+    const sd = iso3 ? sanctionData[iso3] : null;
+    const visible = sd && isVisible(sd);
+    const cat = getCategory(sd);
+
+    this.className.baseVal = `country-path ${visible ? cat : 'neutral'}-sanction`;
+    if (iso3 === selectedCountry && visible) this.classList.add('highlighted');
+  });
+}
+
+function zoomIn() { svg.transition().call(zoom.scaleBy, 1.5); }
+function zoomOut() { svg.transition().call(zoom.scaleBy, 0.67); }
+function resetZoom() { svg.transition().call(zoom.transform, d3.zoomIdentity); }
+
+// Init
+buildList();
+window.addEventListener('load', initMap);
+window.addEventListener('resize', () => {
+  const W = document.getElementById('map-area').clientWidth;
+  const H = document.getElementById('map-area').clientHeight;
+  svg.attr('width', W).attr('height', H);
+  projection.scale(W / 6.1).translate([W / 2, H / 2]);
+  path = d3.geoPath().projection(projection);
+  d3.selectAll('.country-path').attr('d', path);
+});
+</script>
+</body>
+</html>
