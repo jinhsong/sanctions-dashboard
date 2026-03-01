@@ -195,6 +195,36 @@ header {
 .source-link { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; color: var(--accent); text-decoration: none; padding: 5px 12px; border: 1px solid rgba(0,212,255,0.25); background: rgba(0,212,255,0.05); transition: all 0.15s; }
 .source-link:hover { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.5); }
 .disclaimer { margin-top: 16px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); font-size: 10px; color: var(--text3); line-height: 1.65; font-family: var(--mono); }
+
+/* AI 업데이트 버튼 */
+.ai-update-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.15); margin-bottom: 16px; }
+.ai-update-label { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10px; color: var(--text2); }
+.ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.ai-dot.loading { animation: aipulse 1s infinite; }
+@keyframes aipulse { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+.btn-ai-refresh { display: flex; align-items: center; gap: 5px; padding: 5px 12px; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.3); color: var(--accent); font-family: var(--mono); font-size: 10px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
+.btn-ai-refresh:hover { background: rgba(0,212,255,0.16); }
+.btn-ai-refresh:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ai-refresh .spin { display: inline-block; }
+.btn-ai-refresh.spinning .spin { animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* AI 로딩 스켈레톤 */
+.ai-loading-box { padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.ai-loading-spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.ai-loading-text { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+
+/* AI 결과 섹션 */
+.ai-section { margin-bottom: 18px; }
+.ai-section-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.ai-news-item { background: var(--surface2); border: 1px solid var(--border); padding: 12px 14px; margin-bottom: 8px; transition: border-color 0.15s; }
+.ai-news-item:hover { border-color: var(--border2); }
+.ai-news-item:last-child { margin-bottom: 0; }
+.ai-news-date { font-family: var(--mono); font-size: 9px; color: var(--text3); margin-bottom: 4px; }
+.ai-news-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 5px; line-height: 1.4; }
+.ai-news-desc { font-size: 11px; color: var(--text2); line-height: 1.65; }
+.ai-tag { display: inline-block; padding: 1px 6px; font-size: 9px; font-family: var(--mono); border-radius: 1px; margin-top: 6px; }
+.ai-updated-at { font-family: var(--mono); font-size: 9px; color: var(--text3); text-align: right; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -268,6 +298,7 @@ header {
     <div class="dtab" onclick="switchTab(1)">⚖️ 제재 내용</div>
     <div class="dtab" onclick="switchTab(2)">📅 제재 일지</div>
     <div class="dtab" onclick="switchTab(3)">🔗 출처</div>
+    <div class="dtab" onclick="switchTab(4)" style="color:var(--accent)">✦ 최신동향</div>
   </div>
   <div class="drawer-body" id="drawer-body"></div>
 </div>
@@ -706,6 +737,7 @@ const sanctionData = {
 let activeFilters = { both:true, un:true, us:true };
 let currentView = 'all';
 let selectedCountry = null;
+const aiCache = {}; // 국가별 AI 결과 캐시
 
 function getCategory(d) {
   if (!d) return 'neutral';
@@ -736,6 +768,11 @@ function openDrawer(iso) {
   document.querySelectorAll('.country-item').forEach(el => el.classList.remove('selected'));
   const li = document.getElementById(`li-${iso}`);
   if (li) { li.classList.add('selected'); li.scrollIntoView({ block:'nearest' }); }
+
+  // 드로어 열자마자 백그라운드에서 AI 조회 시작 (캐시 없을 때만)
+  if (!aiCache[d.name]) {
+    fetchLatestSanctions(d.name, iso, false);
+  }
 }
 
 function closeDrawer() {
@@ -772,7 +809,14 @@ function renderDrawer(d) {
   const typeBg = { un:'rgba(59,158,255,0.1)', us:'rgba(255,79,79,0.1)', both:'rgba(196,77,255,0.1)' };
   const typeLabel = { un:'UN', us:'미국', both:'UN·미국' };
 
+  const cachedHtml = aiCache[d.name];
+
   const tab0 = `<div class="tab-pane active">
+    ${!cachedHtml ? `<div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;padding:8px 12px;background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.15);font-family:var(--mono);font-size:10px;color:var(--text2);">
+      <div class="ai-dot loading"></div> AI가 최신 정보를 백그라운드에서 불러오는 중... <span style="color:var(--accent)">(✦ 최신동향 탭에서 확인)</span>
+    </div>` : `<div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;padding:8px 12px;background:rgba(59,255,138,0.04);border:1px solid rgba(59,255,138,0.2);font-family:var(--mono);font-size:10px;color:var(--text2);">
+      <div class="live-dot"></div> AI 최신 정보 로드 완료 — <span style="color:#3bff8a">✦ 최신동향 탭</span>에서 확인하세요
+    </div>`}
     <div class="overview-summary">${d.summary}</div>
     <div class="info-block">
       <div class="info-block-title">// 기본 정보</div>
@@ -823,7 +867,212 @@ function renderDrawer(d) {
     <div class="disclaimer">※ 본 정보는 참고용이며, 실제 제재 준수 여부는 반드시 공식 출처 및 법률 전문가를 통해 확인하시기 바랍니다.</div>
   </div>`;
 
-  document.getElementById('drawer-body').innerHTML = tab0 + tab1 + tab2 + tab3;
+  // 탭4: AI 최신 동향 (캐시 있으면 즉시 표시, 없으면 로딩 후 자동 조회)
+  const cachedHtml = aiCache[d.name];
+  const tab4 = `<div class="tab-pane" id="tab-ai">
+    <div class="ai-update-bar">
+      <div class="ai-update-label">
+        <div class="ai-dot" id="ai-dot"></div>
+        <span id="ai-status-label">Claude AI · 웹 검색 기반 실시간 분석</span>
+      </div>
+      <button class="btn-ai-refresh" id="btn-ai-refresh" onclick="fetchLatestSanctions('${d.name}', '${selectedCountry}', true)">
+        <span class="spin">↻</span> 새로고침
+      </button>
+    </div>
+    <div id="ai-result-area">
+      ${cachedHtml || `<div class="ai-loading-box" id="ai-loading">
+        <div class="ai-loading-spinner"></div>
+        <div class="ai-loading-text">${d.name} 최신 제재 동향 검색 중...</div>
+      </div>`}
+    </div>
+  </div>`;
+
+  document.getElementById('drawer-body').innerHTML = tab0 + tab1 + tab2 + tab3 + tab4;
+}
+
+// ── AI 최신 제재 동향 조회 ──
+async function fetchLatestSanctions(countryName, iso, forceRefresh) {
+  const btn = document.getElementById('btn-ai-refresh');
+  const dot = document.getElementById('ai-dot');
+  const area = document.getElementById('ai-result-area');
+  const statusLabel = document.getElementById('ai-status-label');
+  if (!area) return;
+
+  // 강제 새로고침이면 캐시 삭제
+  if (forceRefresh) delete aiCache[countryName];
+
+  // 이미 캐시 있으면 스킵
+  if (!forceRefresh && aiCache[countryName]) return;
+
+  // 로딩 상태
+  if (btn) { btn.disabled = true; btn.classList.add('spinning'); }
+  if (dot) dot.classList.add('loading');
+  if (statusLabel) statusLabel.textContent = '최신 정보 검색 중...';
+  area.innerHTML = `<div class="ai-loading-box">
+    <div class="ai-loading-spinner"></div>
+    <div class="ai-loading-text">${countryName} 최신 제재 동향 분석 중...</div>
+  </div>`;
+
+  const today = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
+
+  const prompt = `오늘 날짜는 ${today}입니다. 당신은 국제 제재 전문 분석가입니다.
+웹 검색을 활용하여 ${countryName}에 대한 최신 제재 동향을 조사하고 분석해주세요.
+특히 최근 1년 이내의 변화에 집중하되, 중요한 과거 사건도 포함하세요.
+
+반드시 아래 JSON 형식으로만 응답하세요. 마크다운 코드블록 없이 순수 JSON만 출력:
+{
+  "updatedAt": "2026년 3월",
+  "headline": "현재 제재 상황 핵심 요약 2~3문장. 가장 최근 상황을 반영하세요.",
+  "recentNews": [
+    {
+      "date": "2026.02",
+      "title": "구체적인 뉴스 제목",
+      "desc": "2~3문장 상세 설명. 어떤 기관이 어떤 조치를 취했는지 구체적으로.",
+      "type": "신규제재 또는 제재완화 또는 집행조치 또는 정책변화 또는 외교동향",
+      "issuer": "미국 OFAC 또는 EU 또는 UN 안보리 등"
+    }
+  ],
+  "timeline": [
+    {
+      "date": "2026.02",
+      "title": "사건 제목",
+      "desc": "1~2문장 설명",
+      "type": "us 또는 un 또는 both"
+    }
+  ],
+  "keyChanges": ["변화사항1", "변화사항2", "변화사항3"],
+  "complianceAlert": "현재 가장 중요한 컴플라이언스 주의사항 한 문장"
+}
+
+recentNews는 최신 순으로 5~7개, timeline은 최신 순으로 6~8개 포함하세요.
+반드시 실제 검색한 최신 정보만 사용하고, 없으면 알려진 최신 사실을 기반으로 작성하세요.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+
+    // 텍스트 블록만 추출
+    const text = (data.content || [])
+      .filter(b => b.type === 'text')
+      .map(b => b.text).join('');
+
+    let parsed;
+    try {
+      const clean = text.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      throw new Error('응답 파싱 실패');
+    }
+
+    const html = renderAiResult(parsed, countryName);
+    aiCache[countryName] = html;
+
+    const resultArea = document.getElementById('ai-result-area');
+    if (resultArea) resultArea.innerHTML = html;
+    if (statusLabel) statusLabel.textContent = `마지막 업데이트: ${parsed.updatedAt || today}`;
+
+    // 제재 일지 탭도 최신 타임라인으로 교체
+    if (parsed.timeline && parsed.timeline.length > 0) {
+      const typeColor = { un:'var(--un-color)', us:'var(--us-color)', both:'var(--both-color)' };
+      const typeBg = { un:'rgba(59,158,255,0.1)', us:'rgba(255,79,79,0.1)', both:'rgba(196,77,255,0.1)' };
+      const typeLabel = { un:'UN', us:'미국', both:'UN·미국' };
+      const tlPane = document.querySelector('#drawer-body .tab-pane:nth-child(3)');
+      if (tlPane) {
+        tlPane.innerHTML = `
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding:8px 10px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);">
+            <span style="font-size:9px;font-family:var(--mono);color:var(--accent)">✦ AI가 최신 정보로 업데이트함 · ${parsed.updatedAt}</span>
+          </div>
+          <div class="timeline">
+            ${parsed.timeline.map(t => `
+              <div class="tl-item">
+                <div class="tl-dot ${t.type || 'us'}"></div>
+                <div class="tl-date">${t.date}</div>
+                <div class="tl-title">${t.title}</div>
+                <div class="tl-desc">${t.desc}</div>
+                <span class="tl-issuer" style="color:${typeColor[t.type]||typeColor.us};background:${typeBg[t.type]||typeBg.us};border:1px solid ${typeColor[t.type]||typeColor.us}44">${typeLabel[t.type]||'제재'}</span>
+              </div>`).join('')}
+          </div>`;
+      }
+    }
+
+  } catch(err) {
+    const resultArea = document.getElementById('ai-result-area');
+    if (resultArea) resultArea.innerHTML = `
+      <div style="padding:20px; background:rgba(255,79,79,0.05); border:1px solid rgba(255,79,79,0.2); font-size:12px; color:var(--text2); line-height:1.6;">
+        <div style="color:var(--us-color); font-family:var(--mono); font-size:10px; margin-bottom:8px;">⚠ 조회 실패</div>
+        ${err.message === '응답 파싱 실패' ? '일시적인 오류가 발생했습니다. 잠시 후 새로고침을 시도해주세요.' : '네트워크 연결을 확인하고 다시 시도해주세요.'}
+        <br><br>
+        <button onclick="fetchLatestSanctions('${countryName}', '${iso}', true)" style="padding:5px 14px; background:transparent; border:1px solid var(--border2); color:var(--text2); font-family:var(--mono); font-size:10px; cursor:pointer;">↻ 다시 시도</button>
+      </div>`;
+    if (statusLabel) statusLabel.textContent = 'Claude AI · 웹 검색 기반 실시간 분석';
+  } finally {
+    const b = document.getElementById('btn-ai-refresh');
+    const d2 = document.getElementById('ai-dot');
+    if (b) { b.disabled = false; b.classList.remove('spinning'); }
+    if (d2) d2.classList.remove('loading');
+  }
+}
+
+function renderAiResult(data, countryName) {
+  const typeStyle = {
+    '신규제재':   { color:'var(--us-color)',   bg:'rgba(255,79,79,0.1)',   border:'rgba(255,79,79,0.3)' },
+    '제재완화':   { color:'var(--un-color)',   bg:'rgba(59,158,255,0.1)', border:'rgba(59,158,255,0.3)' },
+    '집행조치':   { color:'var(--both-color)', bg:'rgba(196,77,255,0.1)', border:'rgba(196,77,255,0.3)' },
+    '정책변화':   { color:'var(--accent3,#ffd60a)', bg:'rgba(255,214,10,0.1)', border:'rgba(255,214,10,0.3)' },
+    '외교동향':   { color:'var(--accent)',     bg:'rgba(0,212,255,0.08)', border:'rgba(0,212,255,0.2)' },
+  };
+
+  const newsHtml = (data.recentNews || []).map(n => {
+    const ts = typeStyle[n.type] || typeStyle['외교동향'];
+    return `<div class="ai-news-item">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+        <div class="ai-news-date">${n.date} · ${n.issuer}</div>
+        <span class="ai-tag" style="color:${ts.color};background:${ts.bg};border:1px solid ${ts.border}">${n.type}</span>
+      </div>
+      <div class="ai-news-title">${n.title}</div>
+      <div class="ai-news-desc">${n.desc}</div>
+    </div>`;
+  }).join('');
+
+  const changesHtml = (data.keyChanges || []).map(c =>
+    `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);">
+      <span style="color:var(--accent);font-family:var(--mono);flex-shrink:0;">→</span>${c}
+    </div>`
+  ).join('');
+
+  return `
+    <div class="ai-section">
+      <div class="ai-section-title">// 현황 요약</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.75;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);">
+        ${data.headline}
+      </div>
+    </div>
+    <div class="ai-section">
+      <div class="ai-section-title">// 최신 뉴스 & 동향</div>
+      ${newsHtml}
+    </div>
+    ${data.keyChanges?.length ? `
+    <div class="ai-section">
+      <div class="ai-section-title">// 주요 변화사항</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);padding:4px 14px;">${changesHtml}</div>
+    </div>` : ''}
+    ${data.complianceAlert ? `
+    <div style="padding:12px 14px;background:rgba(255,79,79,0.05);border:1px solid rgba(255,79,79,0.2);border-left:3px solid var(--us-color);margin-bottom:16px;">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--us-color);letter-spacing:0.15em;margin-bottom:5px;">⚠ COMPLIANCE ALERT</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;">${data.complianceAlert}</div>
+    </div>` : ''}
+    <div class="ai-updated-at">✦ Claude AI + Web Search · ${data.updatedAt}</div>
+    <div class="disclaimer">※ AI 분석 결과는 참고용입니다. 실제 제재 준수 여부는 반드시 공식 출처와 법률 전문가를 통해 확인하세요.</div>`;
 }
 
 // ── 사이드바 ──
