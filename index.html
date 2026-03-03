@@ -996,14 +996,14 @@ recentNews 4~6개, timeline 5~7개, 최신 순으로 정렬.`;
 
   try {
     const resp = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=' + savedKey,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=' + savedKey,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          tools: [{ google_search: {} }],
-          generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+          tools: [{ googleSearch: {} }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 2000 }
         })
       }
     );
@@ -1011,34 +1011,30 @@ recentNews 4~6개, timeline 5~7개, 최신 순으로 정렬.`;
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message || 'API 오류 ('+resp.status+')');
 
-    const text = (data.candidates?.[0]?.content?.parts||[])
-      .filter(function(p){ return p.text; })
-      .map(function(p){ return p.text; }).join('');
-    if (!text) throw new Error('응답 텍스트가 없습니다');
+    // Gemini 응답: candidates[0].content.parts 에서 text 추출
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    const text = parts.filter(function(p){ return p.text; }).map(function(p){ return p.text; }).join('');
+    if (!text) throw new Error('응답 텍스트 없음. 전체 응답: ' + JSON.stringify(data).slice(0, 300));
 
-    // JSON 추출 및 복구 시도
+    // JSON 추출 (```json 코드블록 또는 순수 JSON 모두 처리)
     let parsed = null;
     const clean = text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-    // 중괄호로 감싸진 JSON 찾기
     const m = clean.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('JSON 형식 응답을 찾을 수 없습니다');
+    if (!m) throw new Error('JSON 없음. 실제 응답:\n' + text.slice(0, 400));
     let jsonStr = m[0];
-    // 1차 시도: 그대로 파싱
+
+    // 1차: 직접 파싱
     try { parsed = JSON.parse(jsonStr); } catch(e1) {
-      // 2차 시도: 문자열 내 제어문자 제거 후 재시도
+      // 2차: 제어문자·trailing comma 정리 후 재시도
       try {
         const fixed = jsonStr
-          .replace(/[\u0000-\u001F\u007F]/g, function(c){ // 제어문자
-            const safe = {'\n':'\\n','\r':'\\r','\t':'\\t'};
-            return safe[c] !== undefined ? safe[c] : '';
-          })
-          .replace(/,\s*}/g, '}')   // trailing comma in object
-          .replace(/,\s*\]/g, ']'); // trailing comma in array
+          .replace(/\n/g, '\\n').replace(/\r/g, '').replace(/\t/g, ' ')
+          .replace(/,\s*}/g, '}').replace(/,\s*\]/g, ']');
         parsed = JSON.parse(fixed);
       } catch(e2) {
-        // 3차 시도: 필드별 개별 추출 (최후 수단)
+        // 3차: 필드별 수동 추출
         parsed = extractFieldsManually(jsonStr);
-        if (!parsed) throw new Error('JSON 파싱 실패: ' + e1.message);
+        if (!parsed) throw new Error('JSON 파싱 실패: ' + e1.message + '\n원문: ' + jsonStr.slice(0, 200));
       }
     }
 
@@ -1058,11 +1054,14 @@ recentNews 4~6개, timeline 5~7개, 최신 순으로 정렬.`;
     console.error('AI 오류:', err);
     if (currentISO === iso) {
       const res3 = document.getElementById('ai-result');
+      // 에러 메시지에 실제 응답 내용 표시 (디버깅용)
+      const errMsg = err.message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
       if (res3) res3.innerHTML =
         '<div class="ai-error">'+
           '<div class="ai-error-title">⚠ 조회 실패</div>'+
-          '<div class="ai-error-msg">'+err.message+'<br><br>API 키가 올바른지 확인 후 새로고침 버튼을 눌러주세요.</div>'+
-          '<button class="ai-retry-btn" onclick="doFetch(\''+countryName+'\',\''+iso+'\',true)">↻ 다시 시도</button>'+
+          '<div class="ai-error-msg" style="white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-size:10px;">'+errMsg+'</div>'+
+          '<div style="margin-top:10px;font-size:11px;color:var(--txt2)">API 키가 올바른지 확인 후 새로고침 버튼을 눌러주세요.</div>'+
+          '<button class="ai-retry-btn" style="margin-top:10px" onclick="doFetch(\''+countryName+'\',\''+iso+'\',true)">↻ 다시 시도</button>'+
         '</div>';
       const st2 = document.getElementById('ai-status-txt');
       if (st2) st2.textContent = '오류 발생 — 새로고침 버튼 클릭';
