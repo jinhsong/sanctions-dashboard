@@ -9,222 +9,220 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <style>
 :root {
-  --bg: #080a0f;
-  --surface: #0d1017;
-  --surface2: #131820;
-  --border: #1a2035;
-  --border2: #243050;
-  --text: #d4dae8;
-  --text2: #6b7a99;
-  --text3: #2e3a55;
-  --un-color: #3b9eff;
-  --us-color: #ff4f4f;
-  --both-color: #c44dff;
-  --neutral: #1a2240;
-  --ocean: #07090e;
-  --accent: #00d4ff;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Noto Sans KR', sans-serif;
+  --bg:#080a0f; --sur:#0d1017; --sur2:#131820;
+  --bor:#1a2035; --bor2:#243050;
+  --txt:#d4dae8; --txt2:#6b7a99; --txt3:#2e3a55;
+  --un:#3b9eff; --us:#ff4f4f; --both:#c44dff;
+  --neutral:#1a2240; --ocean:#07090e; --acc:#00d4ff;
+  --mono:'IBM Plex Mono',monospace; --sans:'Noto Sans KR',sans-serif;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
 
-header {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: rgba(8,10,15,0.95); backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px; height: 56px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.logo { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; }
-.logo-box { width: 28px; height: 28px; border: 1.5px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--accent); font-weight: 600; position: relative; overflow: hidden; }
-.logo-box::after { content: ''; position: absolute; inset: 0; background: var(--accent); opacity: 0.08; }
-.logo span { color: var(--accent); }
-.live-badge { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 0.1em; }
-.live-dot { width: 6px; height: 6px; border-radius: 50%; background: #3bff8a; animation: livepulse 2s infinite; }
-@keyframes livepulse { 0%,100% { box-shadow: 0 0 0 0 rgba(59,255,138,0.5); } 50% { box-shadow: 0 0 0 5px rgba(59,255,138,0); } }
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,10,15,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--bor);padding:0 20px;height:56px;display:flex;align-items:center;gap:16px;}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;flex-shrink:0;}
+.logo-box{width:26px;height:26px;border:1.5px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--acc);font-weight:600;position:relative;overflow:hidden;}
+.logo-box::after{content:'';position:absolute;inset:0;background:var(--acc);opacity:.08;}
+.logo span{color:var(--acc);}
+.live-badge{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--txt2);letter-spacing:.1em;flex-shrink:0;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#3bff8a;animation:livepulse 2s infinite;}
+@keyframes livepulse{0%,100%{box-shadow:0 0 0 0 rgba(59,255,138,.5);}50%{box-shadow:0 0 0 5px rgba(59,255,138,0);}}
 
-.layout { display: flex; height: 100vh; padding-top: 56px; }
+/* LAYOUT */
+.layout{display:flex;height:100vh;padding-top:56px;}
+.sidebar{width:280px;flex-shrink:0;background:var(--sur);border-right:1px solid var(--bor);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bor2);}
+.sb-sec{padding:14px 18px;border-bottom:1px solid var(--bor);}
+.sec-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--txt3);text-transform:uppercase;margin-bottom:10px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.stat-card{background:var(--sur2);border:1px solid var(--bor);padding:9px;}
+.stat-num{font-family:var(--mono);font-size:18px;font-weight:600;line-height:1;margin-bottom:3px;}
+.stat-lbl{font-size:10px;color:var(--txt2);}
+.filter-group{display:flex;flex-direction:column;gap:4px;}
+.fbtn{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--bor);background:var(--sur2);cursor:pointer;transition:all .2s;font-size:11px;color:var(--txt2);width:100%;text-align:left;}
+.fbtn.on{color:var(--txt);border-color:var(--bor2);}
+.fbtn.on.both{border-left:3px solid var(--both);}
+.fbtn.on.un{border-left:3px solid var(--un);}
+.fbtn.on.us{border-left:3px solid var(--us);}
+.fdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.fdot-both{background:var(--both);box-shadow:0 0 5px rgba(196,77,255,.6);}
+.fdot-un{background:var(--un);box-shadow:0 0 5px rgba(59,158,255,.6);}
+.fdot-us{background:var(--us);box-shadow:0 0 5px rgba(255,79,79,.6);}
+.fcnt{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--txt2);}
+.clist{display:flex;flex-direction:column;}
+.citem{display:flex;align-items:center;gap:7px;padding:8px 18px;border-bottom:1px solid var(--bor);cursor:pointer;transition:all .15s;font-size:11px;color:var(--txt2);}
+.citem:hover{color:var(--txt);background:rgba(255,255,255,.02);padding-left:22px;}
+.citem.on{color:var(--txt);background:rgba(255,255,255,.025);padding-left:22px;border-left:2px solid var(--acc);}
+.cflag{font-size:13px;}
+.cbadges{margin-left:auto;display:flex;gap:2px;}
+.badge{padding:1px 4px;font-size:7px;font-family:var(--mono);border-radius:1px;}
+.badge-un{background:rgba(59,158,255,.15);color:var(--un);border:1px solid rgba(59,158,255,.3);}
+.badge-us{background:rgba(255,79,79,.15);color:var(--us);border:1px solid rgba(255,79,79,.3);}
 
-.sidebar { width: 280px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; }
-.sidebar::-webkit-scrollbar { width: 3px; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border2); }
-.sidebar-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
-.sec-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; margin-bottom: 12px; }
+/* MAP */
+.map-area{flex:1;position:relative;overflow:hidden;background:var(--ocean);}
+#map-svg{width:100%;height:100%;cursor:grab;}
+#map-svg:active{cursor:grabbing;}
+.country-path{stroke:#0d1825;stroke-width:.5;transition:opacity .15s;}
+.country-path.un-sanction{fill:var(--un);opacity:.75;}
+.country-path.us-sanction{fill:var(--us);opacity:.75;}
+.country-path.both-sanction{fill:var(--both);opacity:.8;}
+.country-path.neutral-sanction{fill:var(--neutral);opacity:1;}
+.country-path:hover{opacity:1!important;stroke:rgba(255,255,255,.4);stroke-width:1;}
+.country-path.hl{opacity:1!important;stroke:#fff;stroke-width:1.5;}
+.map-legend{position:absolute;bottom:20px;left:20px;background:rgba(8,10,15,.88);backdrop-filter:blur(12px);border:1px solid var(--bor);padding:10px 12px;}
+.leg-title{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:var(--txt3);text-transform:uppercase;margin-bottom:7px;}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--txt2);margin-bottom:4px;}
+.leg-item:last-child{margin-bottom:0;}
+.leg-sw{width:10px;height:10px;border-radius:1px;flex-shrink:0;}
+.map-ctrls{position:absolute;bottom:20px;right:20px;display:flex;flex-direction:column;gap:3px;}
+.map-btn{width:30px;height:30px;background:rgba(8,10,15,.88);backdrop-filter:blur(12px);border:1px solid var(--bor);color:var(--txt2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.map-btn:hover{color:var(--txt);border-color:var(--bor2);}
+.map-topbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(8,10,15,.8);backdrop-filter:blur(12px);border:1px solid var(--bor);padding:6px 16px;font-family:var(--mono);font-size:10px;color:var(--txt2);white-space:nowrap;}
+.map-topbar b{color:var(--txt);}
+.view-toggle{position:absolute;top:14px;right:14px;display:flex;gap:2px;}
+.vtbtn{padding:5px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;background:rgba(8,10,15,.88);border:1px solid var(--bor);color:var(--txt2);cursor:pointer;transition:all .15s;}
+.vtbtn.on{color:var(--acc);border-color:var(--acc);background:rgba(0,212,255,.05);}
 
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.stat-card { background: var(--surface2); border: 1px solid var(--border); padding: 10px; border-radius: 2px; }
-.stat-num { font-family: var(--mono); font-size: 20px; font-weight: 600; line-height: 1; margin-bottom: 3px; }
-.stat-label { font-size: 10px; color: var(--text2); }
+/* Tooltip */
+.tip{position:absolute;pointer-events:none;background:rgba(8,10,15,.95);backdrop-filter:blur(12px);border:1px solid var(--bor2);padding:9px 12px;display:none;z-index:300;max-width:210px;}
+.tip.show{display:block;}
+.tt-name{font-size:12px;font-weight:600;margin-bottom:5px;}
+.tt-badges{display:flex;gap:3px;margin-bottom:4px;}
+.tt-desc{font-size:10px;color:var(--txt2);line-height:1.5;}
+.tt-hint{font-size:9px;color:var(--acc);margin-top:5px;font-family:var(--mono);opacity:.7;}
 
-.filter-group { display: flex; flex-direction: column; gap: 5px; }
-.filter-btn { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; border-radius: 2px; transition: all 0.2s; font-family: var(--sans); font-size: 12px; color: var(--text2); width: 100%; text-align: left; }
-.filter-btn.active { color: var(--text); border-color: var(--border2); }
-.filter-btn.active.un { border-left: 3px solid var(--un-color); }
-.filter-btn.active.us { border-left: 3px solid var(--us-color); }
-.filter-btn.active.both { border-left: 3px solid var(--both-color); }
-.filter-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.dot-un { background: var(--un-color); box-shadow: 0 0 6px rgba(59,158,255,0.6); }
-.dot-us { background: var(--us-color); box-shadow: 0 0 6px rgba(255,79,79,0.6); }
-.dot-both { background: var(--both-color); box-shadow: 0 0 6px rgba(196,77,255,0.6); }
-.filter-count { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--text2); }
+/* DRAWER */
+.drw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;opacity:0;pointer-events:none;transition:opacity .3s;}
+.drw-overlay.open{opacity:1;pointer-events:all;}
+.drawer{position:fixed;top:56px;right:0;bottom:0;width:500px;max-width:92vw;background:var(--sur);border-left:1px solid var(--bor2);z-index:500;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;}
+.drawer.open{transform:translateX(0);}
+.drw-head{padding:20px 24px 16px;border-bottom:1px solid var(--bor);flex-shrink:0;position:relative;}
+.drw-close{position:absolute;top:16px;right:16px;width:28px;height:28px;background:var(--sur2);border:1px solid var(--bor2);color:var(--txt2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.drw-close:hover{color:var(--txt);}
+.drw-flag{font-size:28px;margin-bottom:7px;display:block;}
+.drw-name{font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:7px;}
+.drw-cat{display:inline-block;padding:2px 9px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;border-radius:2px;}
+.drw-tabs{display:flex;border-bottom:1px solid var(--bor);flex-shrink:0;}
+.dtab{flex:1;padding:10px 4px;text-align:center;font-size:10px;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:var(--mono);}
+.dtab:hover{color:var(--txt);}
+.dtab.on{color:var(--acc);border-bottom-color:var(--acc);}
+.drw-body{flex:1;overflow-y:auto;padding:20px 22px;}
+.drw-body::-webkit-scrollbar{width:3px;}
+.drw-body::-webkit-scrollbar-thumb{background:var(--bor2);}
 
-.country-list { display: flex; flex-direction: column; }
-.country-item { display: flex; align-items: center; gap: 8px; padding: 9px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.15s; font-size: 12px; color: var(--text2); }
-.country-item:last-child { border-bottom: none; }
-.country-item:hover { color: var(--text); background: rgba(255,255,255,0.02); padding-left: 24px; }
-.country-item.selected { color: var(--text); background: rgba(255,255,255,0.03); padding-left: 24px; border-left: 2px solid var(--accent); }
-.country-flag { font-size: 14px; }
-.country-badges { margin-left: auto; display: flex; gap: 3px; }
-.badge { padding: 1px 5px; font-size: 8px; font-family: var(--mono); letter-spacing: 0.05em; border-radius: 1px; }
-.badge-un { background: rgba(59,158,255,0.15); color: var(--un-color); border: 1px solid rgba(59,158,255,0.3); }
-.badge-us { background: rgba(255,79,79,0.15); color: var(--us-color); border: 1px solid rgba(255,79,79,0.3); }
+/* Tab panes - CRITICAL: hidden by default, shown when .on */
+.tab-pane{display:none;}
+.tab-pane.on{display:block;}
 
-.map-area { flex: 1; position: relative; overflow: hidden; background: var(--ocean); }
-#map-svg { width: 100%; height: 100%; cursor: grab; }
-#map-svg:active { cursor: grabbing; }
-.country-path { stroke: #0d1825; stroke-width: 0.5; transition: opacity 0.15s; }
-.country-path.un-sanction { fill: var(--un-color); opacity: 0.75; }
-.country-path.us-sanction { fill: var(--us-color); opacity: 0.75; }
-.country-path.both-sanction { fill: var(--both-color); opacity: 0.8; }
-.country-path.neutral { fill: var(--neutral); opacity: 1; }
-.country-path:hover { opacity: 1 !important; stroke: rgba(255,255,255,0.4); stroke-width: 1; }
-.country-path.highlighted { opacity: 1 !important; stroke: #fff; stroke-width: 1.5; }
+/* Overview tab */
+.ov-summary{font-size:12px;color:var(--txt2);line-height:1.75;padding:12px 14px;background:var(--sur2);border:1px solid var(--bor);margin-bottom:16px;border-left:3px solid var(--acc);}
+.info-block{margin-bottom:18px;}
+.ib-title{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:var(--txt3);text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--bor);}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(26,32,53,.6);gap:14px;}
+.info-row:last-child{border-bottom:none;}
+.ikey{font-size:10px;color:var(--txt2);flex-shrink:0;min-width:74px;}
+.ival{font-size:11px;color:var(--txt);text-align:right;line-height:1.5;}
+.stags{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-end;}
+.stag{padding:2px 6px;font-size:9px;font-family:var(--mono);background:rgba(0,212,255,.07);color:var(--acc);border:1px solid rgba(0,212,255,.2);border-radius:2px;}
+.sev-badge{padding:2px 9px;font-family:var(--mono);font-size:10px;border-radius:2px;font-weight:600;}
+.sev-critical{background:rgba(255,79,79,.15);color:var(--us);border:1px solid rgba(255,79,79,.3);}
+.sev-high{background:rgba(255,140,66,.15);color:#ff8c42;border:1px solid rgba(255,140,66,.3);}
+.sev-medium{background:rgba(255,214,10,.15);color:#ffd60a;border:1px solid rgba(255,214,10,.3);}
 
-.map-legend { position: absolute; bottom: 24px; left: 24px; background: rgba(8,10,15,0.88); backdrop-filter: blur(12px); border: 1px solid var(--border); padding: 12px 14px; }
-.legend-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
-.legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text2); margin-bottom: 5px; }
-.legend-item:last-child { margin-bottom: 0; }
-.legend-swatch { width: 11px; height: 11px; border-radius: 1px; flex-shrink: 0; }
+/* Sanctions tab */
+.sblk{background:var(--sur2);border:1px solid var(--bor);padding:15px;margin-bottom:12px;position:relative;overflow:hidden;}
+.sblk::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;}
+.sblk.un::before{background:var(--un);}
+.sblk.us::before{background:var(--us);}
+.sb-hd{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;}
+.sb-ico{font-size:16px;flex-shrink:0;}
+.sb-ttl{font-size:12px;font-weight:600;margin-bottom:2px;}
+.sb-sub{font-size:9px;font-family:var(--mono);color:var(--txt2);}
+.sb-desc{font-size:11px;color:var(--txt2);line-height:1.7;margin-bottom:12px;}
+.sb-rows{display:flex;flex-direction:column;gap:5px;}
+.sb-row{display:flex;gap:8px;font-size:10px;}
+.sbk{color:var(--txt3);font-family:var(--mono);width:65px;flex-shrink:0;padding-top:1px;}
+.sbv{color:var(--txt2);line-height:1.5;}
 
-.map-controls { position: absolute; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 4px; }
-.map-btn { width: 32px; height: 32px; background: rgba(8,10,15,0.88); backdrop-filter: blur(12px); border: 1px solid var(--border); color: var(--text2); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: var(--mono); }
-.map-btn:hover { color: var(--text); border-color: var(--border2); }
+/* Timeline tab */
+.tl-header{display:flex;align-items:center;gap:6px;margin-bottom:14px;padding:7px 10px;font-family:var(--mono);font-size:9px;color:var(--txt2);}
+.tl-header.ai-updated{background:rgba(59,255,138,.04);border:1px solid rgba(59,255,138,.18);color:#3bff8a;}
+.tl-header.static{background:var(--sur2);border:1px solid var(--bor);}
+.timeline{position:relative;padding-left:20px;}
+.timeline::before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:var(--bor2);}
+.tl-item{position:relative;margin-bottom:18px;}
+.tl-item:last-child{margin-bottom:0;}
+.tl-dot{position:absolute;left:-18px;top:4px;width:9px;height:9px;border-radius:50%;border:2px solid var(--bg);}
+.tl-dot.un{background:var(--un);box-shadow:0 0 5px rgba(59,158,255,.5);}
+.tl-dot.us{background:var(--us);box-shadow:0 0 5px rgba(255,79,79,.5);}
+.tl-dot.both{background:var(--both);box-shadow:0 0 5px rgba(196,77,255,.5);}
+.tl-date{font-family:var(--mono);font-size:9px;color:var(--txt3);margin-bottom:2px;}
+.tl-ttl{font-size:12px;font-weight:500;color:var(--txt);margin-bottom:4px;}
+.tl-desc{font-size:11px;color:var(--txt2);line-height:1.6;}
+.tl-tag{display:inline-block;margin-top:5px;padding:1px 6px;font-size:8px;font-family:var(--mono);border-radius:1px;}
 
-.tooltip { position: absolute; pointer-events: none; background: rgba(8,10,15,0.95); backdrop-filter: blur(12px); border: 1px solid var(--border2); padding: 10px 14px; display: none; z-index: 300; max-width: 220px; }
-.tooltip.show { display: block; }
-.tt-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-.tt-badges { display: flex; gap: 4px; margin-bottom: 5px; }
-.tt-desc { font-size: 11px; color: var(--text2); line-height: 1.5; }
-.tt-hint { font-size: 10px; color: var(--accent); margin-top: 6px; font-family: var(--mono); opacity: 0.7; }
+/* Sources tab */
+.src-item{background:var(--sur2);border:1px solid var(--bor);padding:12px 14px;margin-bottom:8px;transition:border-color .15s;}
+.src-item:hover{border-color:var(--bor2);}
+.src-item:last-child{margin-bottom:0;}
+.src-org{font-size:12px;font-weight:600;margin-bottom:3px;}
+.src-type{display:inline-block;padding:1px 6px;font-size:8px;font-family:var(--mono);border-radius:1px;margin-bottom:6px;}
+.src-desc{font-size:10px;color:var(--txt2);line-height:1.6;margin-bottom:8px;}
+.src-link{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--acc);text-decoration:none;padding:4px 10px;border:1px solid rgba(0,212,255,.25);background:rgba(0,212,255,.05);transition:all .15s;}
+.src-link:hover{background:rgba(0,212,255,.12);border-color:rgba(0,212,255,.5);}
+.disclaimer{margin-top:14px;padding:10px 12px;background:var(--sur2);border:1px solid var(--bor);font-size:9px;color:var(--txt3);line-height:1.6;font-family:var(--mono);}
 
-.view-toggle { position: absolute; top: 16px; right: 16px; display: flex; gap: 2px; }
-.vt-btn { padding: 6px 14px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; background: rgba(8,10,15,0.88); border: 1px solid var(--border); color: var(--text2); cursor: pointer; transition: all 0.15s; }
-.vt-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(0,212,255,0.05); }
-
-.map-topbar { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: rgba(8,10,15,0.8); backdrop-filter: blur(12px); border: 1px solid var(--border); padding: 7px 18px; font-family: var(--mono); font-size: 11px; color: var(--text2); white-space: nowrap; }
-.map-topbar span { color: var(--text); }
-
-/* ═══ DRAWER ═══ */
-.drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 400; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-.drawer-overlay.open { opacity: 1; pointer-events: all; }
-
-.drawer { position: fixed; top: 56px; right: 0; bottom: 0; width: 500px; max-width: 92vw; background: var(--surface); border-left: 1px solid var(--border2); z-index: 500; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; overflow: hidden; }
-.drawer.open { transform: translateX(0); }
-
-.drawer-head { padding: 24px 28px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0; position: relative; }
-.drawer-close { position: absolute; top: 20px; right: 20px; width: 30px; height: 30px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-.drawer-close:hover { color: var(--text); }
-.drawer-flag { font-size: 32px; margin-bottom: 8px; display: block; }
-.drawer-country { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
-.drawer-cat { display: inline-block; padding: 3px 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; border-radius: 2px; }
-
-.drawer-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.dtab { flex: 1; padding: 11px 6px; text-align: center; font-size: 11px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; font-family: var(--mono); letter-spacing: 0.03em; }
-.dtab:hover { color: var(--text); }
-.dtab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-.drawer-body { flex: 1; overflow-y: auto; padding: 22px 26px; }
-.drawer-body::-webkit-scrollbar { width: 3px; }
-.drawer-body::-webkit-scrollbar-thumb { background: var(--border2); }
-
-.tab-pane { display: none; }
-.tab-pane.active { display: block; }
-
-/* Overview */
-.overview-summary { font-size: 13px; color: var(--text2); line-height: 1.75; padding: 14px 16px; background: var(--surface2); border: 1px solid var(--border); margin-bottom: 20px; border-left: 3px solid var(--accent); }
-.info-block { margin-bottom: 20px; }
-.info-block-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid rgba(26,32,53,0.6); gap: 16px; }
-.info-row:last-child { border-bottom: none; }
-.info-key { font-size: 11px; color: var(--text2); flex-shrink: 0; min-width: 80px; }
-.info-val { font-size: 12px; color: var(--text); text-align: right; line-height: 1.5; }
-.sector-tags { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
-.sector-tag { padding: 2px 7px; font-size: 10px; font-family: var(--mono); background: rgba(0,212,255,0.07); color: var(--accent); border: 1px solid rgba(0,212,255,0.2); border-radius: 2px; }
-.severity-badge { padding: 3px 10px; font-family: var(--mono); font-size: 11px; border-radius: 2px; font-weight: 600; }
-.sev-critical { background: rgba(255,79,79,0.15); color: var(--us-color); border: 1px solid rgba(255,79,79,0.3); }
-.sev-high { background: rgba(255,140,66,0.15); color: #ff8c42; border: 1px solid rgba(255,140,66,0.3); }
-.sev-medium { background: rgba(255,214,10,0.15); color: #ffd60a; border: 1px solid rgba(255,214,10,0.3); }
-
-/* Sanctions */
-.sanction-block { background: var(--surface2); border: 1px solid var(--border); padding: 18px; margin-bottom: 14px; position: relative; overflow: hidden; }
-.sanction-block::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; }
-.sanction-block.un::before { background: var(--un-color); }
-.sanction-block.us::before { background: var(--us-color); }
-.sb-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-.sb-icon { font-size: 18px; flex-shrink: 0; }
-.sb-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-.sb-subtitle { font-size: 10px; font-family: var(--mono); color: var(--text2); }
-.sb-desc { font-size: 12px; color: var(--text2); line-height: 1.75; margin-bottom: 14px; }
-.sb-details { display: flex; flex-direction: column; gap: 7px; }
-.sb-detail-row { display: flex; gap: 10px; font-size: 11px; }
-.sb-detail-key { color: var(--text3); font-family: var(--mono); width: 70px; flex-shrink: 0; padding-top: 1px; }
-.sb-detail-val { color: var(--text2); line-height: 1.55; }
-
-/* Timeline */
-.timeline { position: relative; padding-left: 22px; }
-.timeline::before { content: ''; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: var(--border2); }
-.tl-item { position: relative; margin-bottom: 22px; }
-.tl-item:last-child { margin-bottom: 0; }
-.tl-dot { position: absolute; left: -20px; top: 5px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg); }
-.tl-dot.un { background: var(--un-color); box-shadow: 0 0 6px rgba(59,158,255,0.5); }
-.tl-dot.us { background: var(--us-color); box-shadow: 0 0 6px rgba(255,79,79,0.5); }
-.tl-dot.both { background: var(--both-color); box-shadow: 0 0 6px rgba(196,77,255,0.5); }
-.tl-date { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 3px; }
-.tl-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
-.tl-desc { font-size: 12px; color: var(--text2); line-height: 1.6; }
-.tl-issuer { display: inline-block; margin-top: 6px; padding: 1px 7px; font-size: 9px; font-family: var(--mono); border-radius: 1px; }
-
-/* Sources */
-.source-item { background: var(--surface2); border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 10px; transition: border-color 0.15s; }
-.source-item:hover { border-color: var(--border2); }
-.source-item:last-child { margin-bottom: 0; }
-.source-org { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.source-type { display: inline-block; padding: 1px 7px; font-size: 9px; font-family: var(--mono); border-radius: 1px; margin-bottom: 7px; }
-.source-desc { font-size: 11px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
-.source-link { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; color: var(--accent); text-decoration: none; padding: 5px 12px; border: 1px solid rgba(0,212,255,0.25); background: rgba(0,212,255,0.05); transition: all 0.15s; }
-.source-link:hover { background: rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.5); }
-.disclaimer { margin-top: 16px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); font-size: 10px; color: var(--text3); line-height: 1.65; font-family: var(--mono); }
-
-/* AI 업데이트 버튼 */
-.ai-update-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(0,212,255,0.04); border: 1px solid rgba(0,212,255,0.15); margin-bottom: 16px; }
-.ai-update-label { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10px; color: var(--text2); }
-.ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-.ai-dot.loading { animation: aipulse 1s infinite; }
-@keyframes aipulse { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
-.btn-ai-refresh { display: flex; align-items: center; gap: 5px; padding: 5px 12px; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.3); color: var(--accent); font-family: var(--mono); font-size: 10px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
-.btn-ai-refresh:hover { background: rgba(0,212,255,0.16); }
-.btn-ai-refresh:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-ai-refresh .spin { display: inline-block; }
-.btn-ai-refresh.spinning .spin { animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* AI 로딩 스켈레톤 */
-.ai-loading-box { padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-.ai-loading-spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-.ai-loading-text { font-family: var(--mono); font-size: 11px; color: var(--text2); }
-
-/* AI 결과 섹션 */
-.ai-section { margin-bottom: 18px; }
-.ai-section-title { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.ai-news-item { background: var(--surface2); border: 1px solid var(--border); padding: 12px 14px; margin-bottom: 8px; transition: border-color 0.15s; }
-.ai-news-item:hover { border-color: var(--border2); }
-.ai-news-item:last-child { margin-bottom: 0; }
-.ai-news-date { font-family: var(--mono); font-size: 9px; color: var(--text3); margin-bottom: 4px; }
-.ai-news-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 5px; line-height: 1.4; }
-.ai-news-desc { font-size: 11px; color: var(--text2); line-height: 1.65; }
-.ai-tag { display: inline-block; padding: 1px 6px; font-size: 9px; font-family: var(--mono); border-radius: 1px; margin-top: 6px; }
-.ai-updated-at { font-family: var(--mono); font-size: 9px; color: var(--text3); text-align: right; margin-top: 8px; }
+/* AI 최신 탭 */
+.ai-panel{display:flex;flex-direction:column;gap:0;}
+.ai-keybar{padding:12px 14px;background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.2);margin-bottom:14px;}
+.ai-keybar-title{font-family:var(--mono);font-size:9px;color:var(--acc);letter-spacing:.1em;margin-bottom:8px;}
+.ai-keybar-row{display:flex;gap:6px;align-items:center;}
+.ai-keyinput{flex:1;background:var(--sur2);border:1px solid var(--bor2);color:var(--txt);font-family:var(--mono);font-size:11px;padding:6px 10px;outline:none;transition:border-color .15s;}
+.ai-keyinput:focus{border-color:rgba(0,212,255,.5);}
+.ai-keybtn{padding:6px 14px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.4);color:var(--acc);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.ai-keybtn:hover{background:rgba(0,212,255,.2);}
+.ai-keybtn:disabled{opacity:.4;cursor:not-allowed;}
+.ai-status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:6px 10px;background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.1);}
+.ai-status-left{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--txt2);}
+.ai-pulse{width:6px;height:6px;border-radius:50%;background:var(--acc);}
+.ai-pulse.spin{animation:aispin 1s infinite;}
+@keyframes aispin{0%,100%{opacity:1;}50%{opacity:.2;}}
+.ai-refresh-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.3);color:var(--acc);font-family:var(--mono);font-size:9px;cursor:pointer;transition:all .15s;}
+.ai-refresh-btn:hover:not(:disabled){background:rgba(0,212,255,.16);}
+.ai-refresh-btn:disabled{opacity:.4;cursor:not-allowed;}
+.ai-refresh-ico{display:inline-block;}
+.spinning .ai-refresh-ico{animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ai-result{flex:1;}
+.ai-loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 0;}
+.ai-spinner{width:28px;height:28px;border:2px solid var(--bor2);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite;}
+.ai-loading-txt{font-family:var(--mono);font-size:11px;color:var(--txt2);}
+.ai-sec{margin-bottom:18px;}
+.ai-sec-ttl{font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:var(--txt3);text-transform:uppercase;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--bor);}
+.ai-headline{font-size:12px;color:var(--txt2);line-height:1.75;padding:11px 13px;background:var(--sur2);border:1px solid var(--bor);border-left:3px solid var(--acc);}
+.ai-news{background:var(--sur2);border:1px solid var(--bor);padding:11px 13px;margin-bottom:8px;transition:border-color .15s;}
+.ai-news:hover{border-color:var(--bor2);}
+.ai-news:last-child{margin-bottom:0;}
+.ai-news-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.ai-news-meta{font-family:var(--mono);font-size:9px;color:var(--txt3);}
+.ai-ntag{padding:1px 6px;font-size:9px;font-family:var(--mono);border-radius:1px;}
+.ai-news-ttl{font-size:12px;font-weight:600;color:var(--txt);margin-bottom:4px;line-height:1.4;}
+.ai-news-desc{font-size:11px;color:var(--txt2);line-height:1.6;}
+.ai-changes-item{display:flex;gap:7px;padding:5px 0;border-bottom:1px solid var(--bor);font-size:11px;color:var(--txt2);}
+.ai-changes-item:last-child{border-bottom:none;}
+.ai-changes-arrow{color:var(--acc);font-family:var(--mono);flex-shrink:0;}
+.ai-alert{padding:11px 13px;background:rgba(255,79,79,.05);border:1px solid rgba(255,79,79,.2);border-left:3px solid var(--us);margin-bottom:14px;}
+.ai-alert-lbl{font-family:var(--mono);font-size:8px;color:var(--us);letter-spacing:.15em;margin-bottom:4px;}
+.ai-alert-txt{font-size:11px;color:var(--txt2);line-height:1.6;}
+.ai-updated{font-family:var(--mono);font-size:9px;color:var(--txt3);text-align:right;margin-top:8px;}
+.ai-error{padding:16px;background:rgba(255,79,79,.05);border:1px solid rgba(255,79,79,.2);}
+.ai-error-title{font-family:var(--mono);font-size:9px;color:var(--us);margin-bottom:8px;}
+.ai-error-msg{font-size:11px;color:var(--txt2);line-height:1.6;margin-bottom:12px;}
+.ai-retry-btn{padding:5px 14px;background:transparent;border:1px solid var(--bor2);color:var(--txt2);font-family:var(--mono);font-size:10px;cursor:pointer;}
+.ai-retry-btn:hover{border-color:var(--bor2);color:var(--txt);}
 </style>
 </head>
 <body>
@@ -235,279 +233,267 @@ header {
 </header>
 
 <div class="layout">
+  <!-- SIDEBAR -->
   <div class="sidebar">
-    <div class="sidebar-section">
-      <div class="sec-label">// 제재 현황 통계</div>
+    <div class="sb-sec">
+      <div class="sec-lbl">// 제재 현황</div>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-num" style="color:var(--un-color)" id="un-count">-</div><div class="stat-label">🇺🇳 UN 제재국</div></div>
-        <div class="stat-card"><div class="stat-num" style="color:var(--us-color)" id="us-count">-</div><div class="stat-label">🇺🇸 미국 제재국</div></div>
-        <div class="stat-card" style="grid-column:span 2"><div class="stat-num" style="color:var(--both-color)" id="both-count">-</div><div class="stat-label">🔴 UN + 미국 동시 제재국</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--un)" id="cnt-un">-</div><div class="stat-lbl">🇺🇳 UN 제재</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--us)" id="cnt-us">-</div><div class="stat-lbl">🇺🇸 미국 제재</div></div>
+        <div class="stat-card" style="grid-column:span 2"><div class="stat-num" style="color:var(--both)" id="cnt-both">-</div><div class="stat-lbl">🔴 UN + 미국 동시</div></div>
       </div>
     </div>
-    <div class="sidebar-section">
-      <div class="sec-label">// 필터</div>
+    <div class="sb-sec">
+      <div class="sec-lbl">// 필터</div>
       <div class="filter-group">
-        <button class="filter-btn active both" id="btn-both" onclick="setFilter('both')"><div class="filter-dot dot-both"></div>UN + 미국 동시<span class="filter-count" id="fc-both"></span></button>
-        <button class="filter-btn active un" id="btn-un" onclick="setFilter('un')"><div class="filter-dot dot-un"></div>UN 단독<span class="filter-count" id="fc-un"></span></button>
-        <button class="filter-btn active us" id="btn-us" onclick="setFilter('us')"><div class="filter-dot dot-us"></div>미국 단독<span class="filter-count" id="fc-us"></span></button>
+        <button class="fbtn on both" id="fbtn-both" onclick="toggleFilter('both')"><div class="fdot fdot-both"></div>UN + 미국 동시<span class="fcnt" id="fc-both"></span></button>
+        <button class="fbtn on un" id="fbtn-un" onclick="toggleFilter('un')"><div class="fdot fdot-un"></div>UN 단독<span class="fcnt" id="fc-un"></span></button>
+        <button class="fbtn on us" id="fbtn-us" onclick="toggleFilter('us')"><div class="fdot fdot-us"></div>미국 단독<span class="fcnt" id="fc-us"></span></button>
       </div>
     </div>
-    <div style="padding:12px 20px 8px; border-bottom:1px solid var(--border); flex-shrink:0;">
-      <div class="sec-label" style="margin-bottom:0;">// 국가 목록 — 클릭하여 상세보기</div>
+    <div style="padding:10px 18px 7px;border-bottom:1px solid var(--bor);flex-shrink:0;">
+      <div class="sec-lbl" style="margin-bottom:0">// 국가 목록 — 클릭하여 상세보기</div>
     </div>
-    <div class="country-list" id="country-list"></div>
+    <div class="clist" id="clist"></div>
   </div>
 
+  <!-- MAP -->
   <div class="map-area" id="map-area">
-    <div class="map-topbar">총 <span id="visible-count">-</span>개국 제재 적용 중 &nbsp;·&nbsp; 국가 클릭 → 상세정보</div>
+    <div class="map-topbar">총 <b id="vis-cnt">-</b>개국 제재 적용 중 &nbsp;·&nbsp; 클릭 → 상세정보</div>
     <div class="view-toggle">
-      <button class="vt-btn active" id="vt-all" onclick="setView('all')">전체</button>
-      <button class="vt-btn" id="vt-un" onclick="setView('un_only')">UN만</button>
-      <button class="vt-btn" id="vt-us" onclick="setView('us_only')">미국만</button>
+      <button class="vtbtn on" id="vt-all" onclick="setView('all')">전체</button>
+      <button class="vtbtn" id="vt-un" onclick="setView('un_only')">UN만</button>
+      <button class="vtbtn" id="vt-us" onclick="setView('us_only')">미국만</button>
     </div>
     <svg id="map-svg"></svg>
     <div class="map-legend">
-      <div class="legend-title">// 범례</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:var(--both-color)"></div>UN + 미국 동시</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:var(--un-color)"></div>UN 단독</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:var(--us-color)"></div>미국 단독</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:var(--neutral)"></div>비제재국</div>
+      <div class="leg-title">SANCTIONS TYPE</div>
+      <div class="leg-item"><div class="leg-sw" style="background:var(--both)"></div>UN + 미국</div>
+      <div class="leg-item"><div class="leg-sw" style="background:var(--un)"></div>UN 단독</div>
+      <div class="leg-item"><div class="leg-sw" style="background:var(--us)"></div>미국 단독</div>
+      <div class="leg-item"><div class="leg-sw" style="background:var(--neutral)"></div>비제재국</div>
     </div>
-    <div class="map-controls">
+    <div class="map-ctrls">
       <button class="map-btn" onclick="zoomIn()">+</button>
       <button class="map-btn" onclick="zoomOut()">−</button>
       <button class="map-btn" onclick="resetZoom()" style="font-size:10px">⌂</button>
     </div>
-    <div class="tooltip" id="tooltip">
+    <div class="tip" id="tip">
       <div class="tt-name" id="tt-name"></div>
       <div class="tt-badges" id="tt-badges"></div>
       <div class="tt-desc" id="tt-desc"></div>
-      <div class="tt-hint">클릭하여 상세 정보 보기 →</div>
+      <div class="tt-hint">클릭하여 상세보기 →</div>
     </div>
   </div>
 </div>
 
 <!-- DRAWER -->
-<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drw-overlay" id="drw-overlay" onclick="closeDrawer()"></div>
 <div class="drawer" id="drawer">
-  <div class="drawer-head" id="drawer-head">
-    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <div class="drw-head" id="drw-head">
+    <button class="drw-close" onclick="closeDrawer()">✕</button>
   </div>
-  <div class="drawer-tabs">
-    <div class="dtab active" onclick="switchTab(0)">📋 개요</div>
-    <div class="dtab" onclick="switchTab(1)">⚖️ 제재 내용</div>
-    <div class="dtab" onclick="switchTab(2)">📅 제재 일지</div>
-    <div class="dtab" onclick="switchTab(3)">🔗 출처</div>
-    <div class="dtab" onclick="switchTab(4)" style="color:var(--accent)">✦ 최신동향</div>
+  <div class="drw-tabs">
+    <div class="dtab on" onclick="switchTab(0)">개요</div>
+    <div class="dtab" onclick="switchTab(1)">제재 내용</div>
+    <div class="dtab" onclick="switchTab(2)">제재 일지</div>
+    <div class="dtab" onclick="switchTab(3)">출처</div>
+    <div class="dtab" onclick="switchTab(4)" style="color:var(--acc)">✦ 최신동향</div>
   </div>
-  <div class="drawer-body" id="drawer-body"></div>
+  <div class="drw-body" id="drw-body"></div>
 </div>
 
 <script>
-const sanctionData = {
-  "PRK": { name:"북한", flag:"🇰🇵", un:true, us:true, severity:"critical", since:"2006",
+const SD = {
+  "PRK":{ name:"북한", flag:"🇰🇵", un:true, us:true, severity:"critical", since:"2006",
     sectors:["핵·미사일","금융","에너지","무역","노동력수출","IT·사이버"],
-    summary:"핵·미사일 프로그램을 이유로 국제사회의 가장 광범위한 제재를 받고 있는 국가. UN 안보리 결의와 미국 OFAC 포괄 제재가 동시에 적용되며, 실질적으로 모든 교역과 금융거래가 차단되어 있다.",
+    summary:"핵·미사일 프로그램으로 국제사회의 가장 포괄적인 제재를 받고 있다. UN 안보리 결의와 미국 OFAC 제재가 동시 적용되며 모든 교역·금융거래가 실질적으로 차단된 상태이다.",
     sanctions:[
       { type:"un", title:"UN 안보리 포괄 제재", authority:"UN 안전보장이사회",
         resolutions:"결의 1718(2006), 1874(2009), 2087·2094(2013), 2270·2321(2016), 2356·2371·2375·2397(2017)",
-        desc:"핵실험 및 ICBM 발사에 대응한 단계적 제재 강화. 석유제품 연간 50만 배럴, 정제유 연간 200만 배럴 수입 상한. 석탄·철·납·해산물·섬유 수출 전면 금지. 해외파견 노동자 24개월 내 귀환 의무. 북한 선박 공해상 검색 허용.",
-        targets:"정부 기관, 군 관련 단체, 고위 관리", frozenAssets:"추산 불가 (사실상 전면 금지)" },
-      { type:"us", title:"DPRK 포괄 제재 프로그램", authority:"미국 재무부 OFAC",
+        desc:"핵실험·ICBM 발사 대응 단계적 제재 강화. 정제유 연간 50만 배럴 상한, 석탄·철·납·해산물·섬유 수출 전면 금지. 해외파견 노동자 24개월 내 귀환 의무화. 북한 선박 공해상 검색 허용.",
+        targets:"정부·군 기관, 고위 관리 등 다수", frozenAssets:"추산 불가 (사실상 전면 금지)" },
+      { type:"us", title:"DPRK 포괄 제재", authority:"미국 재무부 OFAC",
         resolutions:"EO 13466, 13551, 13570, 13687, 13722, 13810",
-        desc:"북한과의 모든 거래를 원칙적으로 금지. 제3국 기업이 북한과 거래할 경우 미국 금융시스템 접근 차단(2차 제재 위험). 라자루스 그룹 등 사이버 해킹 조직 별도 지정. IT 노동자를 통한 외화 획득 경로 차단.",
-        targets:"2,800개 이상 개인·단체 SDN 목록 등재", frozenAssets:"미국 내 자산 전면 동결" }
+        desc:"북한과의 모든 거래 원칙적 금지. 제3국 기업 북한 거래 시 미국 금융시스템 차단(2차 제재). 라자루스 그룹 등 사이버 해킹 조직 별도 지정.",
+        targets:"2,800개 이상 개인·단체 SDN 등재", frozenAssets:"미국 내 자산 전면 동결" }
     ],
     timeline:[
-      { date:"2024.11", title:"러시아 파병 확인 후 추가 제재 논의", desc:"북한군 약 1만명 러시아 파병 확인. 미국·EU 추가 제재 및 무기 이전 관련 단체 지정 검토.", type:"both" },
-      { date:"2024.06", title:"OFAC, 라자루스 그룹 네트워크 제재", desc:"북한 IT 노동자 활용 기업과 암호화폐 세탁 네트워크 추가 지정. 동남아시아 경유 외화 획득 경로 차단.", type:"us" },
-      { date:"2022.05", title:"UN 추가 결의안 부결 (러·중 거부권)", desc:"ICBM 발사 대응 결의안에 러시아·중국이 거부권 행사. 신규 UN 제재 사실상 중단.", type:"un" },
-      { date:"2017.09", title:"UN 결의 2375·2397호 채택", desc:"섬유 수출 금지, 정제유 대폭 제한, 해산물 수출 전면 금지. 역대 최강 수준.", type:"un" },
-      { date:"2006.10", title:"1차 핵실험 후 첫 UN 제재", desc:"UN 안보리 결의 1718호 채택. 무기 금수 및 사치품 수출 금지.", type:"un" }
+      { date:"2024.11", title:"러시아 파병 후 추가 제재 논의", desc:"북한군 약 1만명 러시아 파병 확인. 무기 이전 관련 단체 추가 지정 검토.", type:"both" },
+      { date:"2022.05", title:"UN 추가 결의안 러·중 거부권으로 부결", desc:"ICBM 발사 대응 결의안 무산. 신규 UN 제재 사실상 중단.", type:"un" },
+      { date:"2017.09", title:"UN 결의 2375·2397호 채택", desc:"역대 최강 수준의 대북 제재. 정제유 대폭 제한, 해산물·섬유 수출 금지.", type:"un" },
+      { date:"2006.10", title:"1차 핵실험 후 첫 UN 제재", desc:"UN 결의 1718호. 무기 금수 및 사치품 수출 금지.", type:"un" }
     ],
     sources:[
-      { org:"UN 안보리 대북제재위원회", type:"UN 공식", desc:"UN 대북제재 결의문, 지정 목록, 전문가 패널 보고서 제공", url:"https://www.un.org/securitycouncil/sanctions/1718" },
-      { org:"미국 OFAC — DPRK 제재", type:"미국 정부", desc:"북한 관련 SDN 목록, 행정명령 전문, 제재 준수 가이드라인", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/north-korea-sanctions" }
+      { org:"UN 안보리 대북제재위원회", type:"UN 공식", desc:"결의문 전문, 지정 목록, 전문가 패널 보고서", url:"https://www.un.org/securitycouncil/sanctions/1718" },
+      { org:"미국 OFAC — DPRK", type:"미국 정부", desc:"SDN 목록, 행정명령 전문, 준수 가이드라인", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/north-korea-sanctions" }
     ]
   },
-  "IRN": { name:"이란", flag:"🇮🇷", un:true, us:true, severity:"critical", since:"2006",
-    sectors:["핵·미사일","석유·가스","금융","방산","운송","드론"],
-    summary:"핵 프로그램, 탄도미사일, 테러 지원을 이유로 포괄 제재를 받고 있다. JCPOA(이란핵합의) 외교 상황에 따라 제재 강도가 변동되었으며, 2018년 미국의 JCPOA 탈퇴 이후 최대 압박 제재가 재개되어 현재까지 유지 중이다.",
+  "IRN":{ name:"이란", flag:"🇮🇷", un:true, us:true, severity:"critical", since:"2006",
+    sectors:["핵·미사일","석유·가스","금융","방산","드론"],
+    summary:"핵 프로그램, 탄도미사일, 테러 지원을 이유로 포괄 제재. 2015년 JCPOA(핵합의)로 완화됐다가 2018년 미국의 탈퇴로 최대 압박이 재개됐다.",
     sanctions:[
-      { type:"un", title:"UN 안보리 핵 비확산 제재", authority:"UN 안전보장이사회",
+      { type:"un", title:"UN 핵 비확산 제재", authority:"UN 안전보장이사회",
         resolutions:"결의 1737(2006), 1747(2007), 1803(2008), 1929(2010), 2231(2015/JCPOA)",
-        desc:"핵 활동 관련 개인·단체 자산동결 및 여행 금지. 핵·미사일 관련 물자 수출입 제한. JCPOA 체결(2015) 후 주요 제재 완화, UN 스냅백 조항으로 2020년 일부 복원.",
+        desc:"핵 활동 관련 개인·단체 자산동결·여행금지. JCPOA 체결 후 주요 완화, 스냅백 조항으로 2020년 일부 복원.",
         targets:"약 100개 이상 개인·단체", frozenAssets:"수십억 달러 (JCPOA 이전 추산)" },
-      { type:"us", title:"IRAN 포괄 제재 프로그램", authority:"미국 재무부 OFAC",
-        resolutions:"IEEPA, ISA, ITRSHRA, CAATSA, EO 13846, 13871 등 다수",
-        desc:"석유·석유화학 부문 전면 제재 (이란산 원유 구매국에 2차 제재). 이란 중앙은행 및 주요 금융기관 SWIFT 차단. 방산·드론 생산 업체 제재. 러시아 드론 지원 관련 2023~2024년 추가 확대.",
-        targets:"2,800개 이상 개인·단체 SDN 등재", frozenAssets:"미국 내 약 1,000억달러 이상 동결" }
+      { type:"us", title:"IRAN 포괄 제재", authority:"미국 재무부 OFAC",
+        resolutions:"IEEPA, ISA, CAATSA, EO 13846, 13871 등",
+        desc:"석유·석유화학 전면 제재 (2차 제재). 이란 중앙은행 SWIFT 차단. 방산·드론 생산업체 제재. 러시아 드론 지원 관련 2023~2024년 확대.",
+        targets:"2,800개 이상 개인·단체 SDN 등재", frozenAssets:"미국 내 약 1,000억달러 이상" }
     ],
     timeline:[
-      { date:"2024.04", title:"이스라엘 공격 후 추가 제재", desc:"이란의 이스라엘 직접 공격(드론·미사일) 대응. 드론·미사일 제조업체 및 관련 네트워크 추가 제재.", type:"us" },
-      { date:"2022.11", title:"반정부 시위 탄압 제재", desc:"마흐사 아미니 사망 계기 시위 탄압 관련 EU·미국 인권 제재 발동.", type:"both" },
-      { date:"2018.05", title:"미국 JCPOA 탈퇴 및 최대 압박 재개", desc:"트럼프 행정부 이란핵합의 탈퇴. 석유·금융 분야 포괄 제재 완전 복원.", type:"us" },
-      { date:"2015.07", title:"JCPOA 체결 — 제재 대폭 완화", desc:"이란·P5+1 핵합의 타결. UN·EU·미국 주요 경제 제재 대폭 완화.", type:"both" },
-      { date:"2006.12", title:"첫 UN 제재 결의 1737호", desc:"이란 핵 활동 중단 거부에 대응한 첫 UN 경제 제재 발동.", type:"un" }
+      { date:"2024.04", title:"이스라엘 공격 후 드론·미사일 제재 확대", desc:"이란의 이스라엘 직접 공격 대응. 드론·미사일 제조업체 추가 제재.", type:"us" },
+      { date:"2022.11", title:"마흐사 아미니 시위 탄압 제재", desc:"반정부 시위 무력 탄압 관련 EU·미국 인권 제재.", type:"both" },
+      { date:"2018.05", title:"미국 JCPOA 탈퇴, 최대 압박 재개", desc:"트럼프 행정부 핵합의 탈퇴. 석유·금융 포괄 제재 완전 복원.", type:"us" },
+      { date:"2015.07", title:"JCPOA 체결 — 제재 대폭 완화", desc:"P5+1 핵합의 타결. UN·EU·미국 주요 경제 제재 완화.", type:"both" }
     ],
     sources:[
-      { org:"UN 이란제재위원회", type:"UN 공식", desc:"이란 관련 UN 안보리 결의 및 전문가 패널 보고서", url:"https://www.un.org/securitycouncil/sanctions/iran" },
-      { org:"미국 OFAC — Iran 제재", type:"미국 정부", desc:"이란 SDN 목록, 제재 프로그램 안내, 특별 허가 정보", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/iran-sanctions" },
-      { org:"EU 제재 포털 (Sanctions Map)", type:"EU 공식", desc:"EU의 이란 관련 제재 법령 및 지정 목록", url:"https://www.sanctionsmap.eu" }
+      { org:"UN 이란제재위원회", type:"UN 공식", desc:"UN 안보리 결의 및 전문가 패널 보고서", url:"https://www.un.org/securitycouncil/sanctions/iran" },
+      { org:"미국 OFAC — Iran", type:"미국 정부", desc:"SDN 목록, 제재 프로그램 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/iran-sanctions" }
     ]
   },
-  "RUS": { name:"러시아", flag:"🇷🇺", un:false, us:true, severity:"critical", since:"2014",
+  "RUS":{ name:"러시아", flag:"🇷🇺", un:false, us:true, severity:"critical", since:"2014",
     sectors:["금융","에너지","방산","수출통제","과두재","운송"],
-    summary:"2022년 2월 우크라이나 전면 침공 이후 서방 40여개국이 역대 최대 규모의 제재를 부과. 중앙은행 자산 동결, SWIFT 차단, 에너지 수출 제한, 수출통제가 동시 적용 중. UN 안보리 제재는 러시아 거부권으로 불가능한 상황.",
+    summary:"2022년 우크라이나 전면 침공 이후 서방 40여개국이 역대 최대 규모의 제재를 부과. 중앙은행 자산 동결, SWIFT 차단, 에너지 제한, 수출통제가 동시 적용 중이다.",
     sanctions:[
-      { type:"us", title:"러시아 포괄 제재 + 수출통제", authority:"미국 재무부 OFAC + 상무부 BIS",
-        resolutions:"EO 13685, 13849, 14024, 14039, 14068, 14071 및 수출관리규정(EAR)",
-        desc:"VTB·Sberbank 등 주요 은행 자산동결 및 SWIFT 차단. 중앙은행 외환보유고(약 3,000억달러) 동결. 푸틴 측근 과두재 자산 동결. 반도체·항공기 부품·군사 장비 수출통제. G7 러시아산 원유 가격상한($60/배럴) 이행 조율.",
+      { type:"us", title:"러시아 포괄 제재 + 수출통제", authority:"미국 OFAC + 상무부 BIS",
+        resolutions:"EO 13685, 13849, 14024, 14039, 14068, 14071 및 EAR",
+        desc:"VTB·Sberbank 등 주요 은행 SWIFT 차단. 중앙은행 외환보유고 약 3,000억달러 동결. 반도체·항공기·군사 장비 수출통제. G7 원유 가격상한($60/배럴) 이행.",
         targets:"16,000개 이상 개인·단체", frozenAssets:"중앙은행 약 3,000억달러 포함 대규모" }
     ],
     timeline:[
-      { date:"2024.10", title:"EU 제14차 제재 패키지 발효", desc:"LNG 환적 EU 항만 금지. 러-북한 협력 관련 추가 제재. 우회수출 방지 제3국 기업 제재 강화.", type:"us" },
-      { date:"2024.06", title:"G7, 동결 자산 이자 우크라 지원", desc:"동결된 중앙은행 자산 이자 약 500억달러를 우크라이나 지원에 활용하기로 합의.", type:"us" },
-      { date:"2024.02", title:"나발니 사망 대응 추가 제재", desc:"러시아 교도소 관련 인사 등 500개 이상 추가 지정.", type:"us" },
-      { date:"2022.03", title:"SWIFT 차단 및 중앙은행 자산 동결", desc:"러시아 주요 은행 SWIFT 퇴출. 중앙은행 외환보유고 약 3,000억달러 동결. 역대 가장 빠른 속도의 제재 발동.", type:"us" },
-      { date:"2022.02", title:"우크라이나 침공 후 전방위 제재", desc:"미국·EU·영국·일본 등 40여개국 동시 제재 발동. 수출통제, 금융, 에너지, 항공 전 부문 포괄.", type:"us" },
-      { date:"2014.03", title:"크림반도 병합 후 첫 제재", desc:"크림반도 불법 병합 대응 개인·단체 자산동결 시작.", type:"us" }
+      { date:"2024.10", title:"EU 제14차 제재 패키지 발효", desc:"LNG 환적 EU 항만 금지. 러-북한 협력 추가 제재. 제3국 우회수출 기업 제재 강화.", type:"us" },
+      { date:"2024.06", title:"G7 동결 자산 이자 우크라 지원 합의", desc:"동결 자산 이자 약 500억달러 우크라이나 지원.", type:"us" },
+      { date:"2022.03", title:"SWIFT 차단 및 중앙은행 자산 동결", desc:"역대 가장 빠른 속도의 제재 발동.", type:"us" },
+      { date:"2022.02", title:"우크라이나 침공 후 전방위 제재", desc:"미국·EU·영국·일본 등 40여개국 동시 발동.", type:"us" },
+      { date:"2014.03", title:"크림반도 병합 후 첫 제재", desc:"크림반도 불법 병합 대응 개인·단체 제재 시작.", type:"us" }
     ],
     sources:[
-      { org:"미국 OFAC — Russia 제재", type:"미국 정부", desc:"러시아 관련 SDN 목록 및 제재 프로그램 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/ukraine-russia-related-sanctions" },
-      { org:"EU 제재 포털", type:"EU 공식", desc:"EU의 러시아 대상 14개 제재 패키지 법령 및 지정 목록", url:"https://www.sanctionsmap.eu" },
-      { org:"미국 BIS 수출통제 목록", type:"미국 정부", desc:"러시아 수출통제 대상 품목 및 기업 목록", url:"https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern" }
+      { org:"미국 OFAC — Russia", type:"미국 정부", desc:"러시아 관련 SDN 목록 및 제재 프로그램", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/ukraine-russia-related-sanctions" },
+      { org:"EU 제재 포털", type:"EU 공식", desc:"EU 러시아 제재 패키지 법령 및 지정 목록", url:"https://www.sanctionsmap.eu" }
     ]
   },
-  "CUB": { name:"쿠바", flag:"🇨🇺", un:false, us:true, severity:"high", since:"1962",
-    sectors:["포괄금수","금융","무역","여행"],
-    summary:"1962년 케네디 행정부 시절 시작된 세계에서 가장 오래된 경제 제재 중 하나. 60년 이상 지속된 미국의 대쿠바 무역·금융 금수로, UN 총회는 매년 압도적 표차로 이 제재의 철폐를 촉구하는 결의안을 채택하고 있다.",
+  "SYR":{ name:"시리아", flag:"🇸🇾", un:false, us:true, severity:"critical", since:"2004",
+    sectors:["포괄금수","에너지","금융","화학무기"],
+    summary:"아사드 정권의 화학무기 사용·민간인 학살로 미국·EU 포괄 제재 부과. UN 안보리 제재는 러·중 거부권으로 불가. 2024년 12월 아사드 정권 붕괴 이후 제재 완화 논의 중.",
     sanctions:[
-      { type:"us", title:"Cuba 포괄 제재 (엠바고)", authority:"미국 재무부 OFAC + 상무부",
-        resolutions:"TWEA(1917), Cuban Assets Control Regulations, Helms-Burton Act(1996)",
-        desc:"쿠바와의 모든 상업·금융 거래 원칙적 금지. 미국 시민의 쿠바 여행 제한(일부 예외 허용). 제3국 기업의 쿠바 내 몰수 재산 거래 시 미국 법원 제소 가능(Helms-Burton III조). 2015년 오바마 정부 일부 완화 후 트럼프 정부 재강화.",
-        targets:"쿠바 정부 기관 및 군 소유 기업 (GAESA 등)", frozenAssets:"쿠바 관련 미국 내 자산 전면 동결" }
+      { type:"us", title:"Syria 포괄 제재 + Caesar Act", authority:"미국 OFAC",
+        resolutions:"Syria Accountability Act(2003), EO 13338·13460·13572·13582, Caesar Act(2020)",
+        desc:"시리아 정부·군·정보기관 전면 제재. 석유·가스 수출 금지. Caesar Act(2020)으로 제3국 기업 거래도 제재 가능.",
+        targets:"아사드 일가, 군·정보기관, 화학무기 관련 단체", frozenAssets:"수십억달러 규모 추산" }
     ],
     timeline:[
-      { date:"2021.07", title:"반정부 시위 탄압 관련 추가 제재", desc:"대규모 민중 시위 탄압 군·경찰 지도자 추가 제재 지정.", type:"us" },
-      { date:"2019.04", title:"Helms-Burton III조 완전 발동", desc:"23년간 유예되던 III조 전면 발동. 제3국 기업의 쿠바 투자 소송 리스크 급증.", type:"us" },
-      { date:"2015.07", title:"오바마, 미·쿠바 국교 정상화", desc:"국교 회복 및 여행·송금 규제 완화. 의회 동의 없이 엠바고 전면 해제는 불가.", type:"us" },
-      { date:"1962.02", title:"케네디, 전면 금수 선언", desc:"쿠바 미사일 위기 직전 전면 무역 금수 시행. 이후 60년 이상 지속.", type:"us" }
+      { date:"2024.12", title:"아사드 정권 붕괴 — 제재 완화 논의", desc:"정권 붕괴 후 시리아 재건 지원을 위한 제재 한시 완화 검토.", type:"us" },
+      { date:"2020.06", title:"Caesar Act 발효", desc:"제3국 기업도 제재 적용 가능. 대대적 확대.", type:"us" },
+      { date:"2011.05", title:"내전 후 아사드 직접 제재", desc:"반정부 시위 무력 진압 대응 아사드 및 일가 직접 제재.", type:"us" }
     ],
     sources:[
-      { org:"미국 OFAC — Cuba 제재", type:"미국 정부", desc:"쿠바 자산통제 규정 및 허가 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/cuba-sanctions" },
-      { org:"UN 총회 쿠바 결의 (참고)", type:"UN 참고", desc:"매년 채택되는 대미 쿠바 제재 철폐 촉구 결의 (UN 제재 아님)", url:"https://www.un.org/en/ga/" }
+      { org:"미국 OFAC — Syria", type:"미국 정부", desc:"SDN 목록 및 Caesar Act 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/syria-sanctions" }
     ]
   },
-  "SYR": { name:"시리아", flag:"🇸🇾", un:false, us:true, severity:"critical", since:"2004",
-    sectors:["포괄금수","에너지","금융","화학무기","방산"],
-    summary:"아사드 정권의 화학무기 사용과 민간인 학살로 미국·EU·영국이 포괄 제재 부과. UN 안보리 제재는 러시아·중국 거부권으로 불가. 2024년 아사드 정권 붕괴 이후 제재 완화 논의가 진행 중이다.",
+  "MMR":{ name:"미얀마", flag:"🇲🇲", un:false, us:true, severity:"high", since:"1997",
+    sectors:["군부인사","군소유기업","에너지","보석"],
+    summary:"2021년 2월 군사 쿠데타 이후 미국·EU·영국이 군부 및 군 소유 기업에 강화된 제재 부과. UN 안보리 제재는 러·중 거부권으로 불가.",
     sanctions:[
-      { type:"us", title:"Syria 포괄 제재 + Caesar Act", authority:"미국 재무부 OFAC",
-        resolutions:"Syria Accountability Act(2003), EO 13338, 13399, 13460, 13572, 13582, Caesar Act(2020)",
-        desc:"시리아 정부·군·정보기관 전면 제재. 석유·가스 부문 수출 금지. Caesar 시리아 민간인 보호법(2020)으로 제3국 기업 거래도 제재 가능. 화학무기 사용 관련 아사드 일가 자산동결.",
-        targets:"아사드 일가, 시리아군·정보기관, 화학무기 관련 단체", frozenAssets:"수십억달러 규모 추산" }
-    ],
-    timeline:[
-      { date:"2024.12", title:"아사드 정권 붕괴 후 제재 완화 논의", desc:"아사드 정권 붕괴 후 시리아 재건 지원을 위한 제재 한시 완화 검토.", type:"us" },
-      { date:"2020.06", title:"Caesar Act 발효", desc:"시리아 재건 사업 참여 제3국 기업에도 제재 적용. 대대적 확대.", type:"us" },
-      { date:"2018.04", title:"화학무기 사용 대응 추가 제재", desc:"두마 화학무기 공격 대응 미국·영국·프랑스 군사 타격 및 추가 제재.", type:"us" },
-      { date:"2011.05", title:"내전 발발 후 아사드 직접 제재", desc:"반정부 시위 무력 진압 대응 아사드 대통령 및 일가 직접 제재.", type:"us" }
-    ],
-    sources:[
-      { org:"미국 OFAC — Syria 제재", type:"미국 정부", desc:"시리아 제재 프로그램 SDN 목록 및 Caesar Act 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/syria-sanctions" },
-      { org:"EU 시리아 제재", type:"EU 공식", desc:"EU의 시리아 제재 법령 및 지정 목록", url:"https://www.sanctionsmap.eu" }
-    ]
-  },
-  "BLR": { name:"벨라루스", flag:"🇧🇾", un:false, us:true, severity:"medium", since:"2006",
-    sectors:["금융","여행금지","비료","석유","항공"],
-    summary:"2020년 선거 부정과 반정부 시위 탄압으로 미국·EU 제재 발동. 2021년 라이언에어 강제 착륙 사건과 2022년 러시아의 우크라이나 침공 기지 제공으로 제재가 대폭 강화되었다.",
-    sanctions:[
-      { type:"us", title:"Belarus 제재", authority:"미국 재무부 OFAC",
-        resolutions:"EO 13405, 14038",
-        desc:"루카셴코 대통령 및 정권 핵심 인사 제재. 국영 기업 자산동결. 이민자 무기화(항공편 조작) 관련 제재. 러시아 침공 지원 관련 방산 분야 추가 제재.",
-        targets:"루카셴코 일가, 보안군 지도자, 국영기업", frozenAssets:"미국 내 자산 동결" }
-    ],
-    timeline:[
-      { date:"2022.03", title:"러시아 침공 기지 제공 관련 추가 제재", desc:"러시아군의 우크라이나 침공 벨라루스 기지 제공 관련 제재 강화.", type:"us" },
-      { date:"2021.05", title:"라이언에어 강제 착륙 — 항공 제재", desc:"반정부 활동가 체포 목적의 민항기 강제 착륙. EU·미국 항공 관련 제재 확대.", type:"us" },
-      { date:"2020.08", title:"선거 부정 및 시위 탄압 제재", desc:"대선 부정 시비와 반정부 시위 무력 탄압 대응 미국·EU 제재 발동.", type:"us" }
-    ],
-    sources:[
-      { org:"미국 OFAC — Belarus 제재", type:"미국 정부", desc:"벨라루스 제재 프로그램 SDN 목록", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/belarus-sanctions" },
-      { org:"EU 벨라루스 제재", type:"EU 공식", desc:"EU의 벨라루스 제재 법령 및 지정 목록", url:"https://www.sanctionsmap.eu" }
-    ]
-  },
-  "MMR": { name:"미얀마", flag:"🇲🇲", un:false, us:true, severity:"high", since:"1997",
-    sectors:["군부인사","군소유기업","에너지","금융","보석"],
-    summary:"2021년 2월 군사 쿠데타 이후 미국·EU·영국이 군부 및 군 소유 기업에 강화된 제재 부과. UN 안보리 제재는 러시아·중국 거부권으로 불가능한 상황.",
-    sanctions:[
-      { type:"us", title:"Burma 제재 프로그램", authority:"미국 재무부 OFAC",
+      { type:"us", title:"Burma 제재", authority:"미국 OFAC",
         resolutions:"EO 13310, 13448, 13619, 14014(2021)",
-        desc:"민 아웅 흘라잉 총사령관 및 군 고위 인사 자산동결. 미얀마경제지주(MEHL)·미얀마경제공사(MEC) 등 군 소유 기업 전면 제재. 에너지·보석·목재 부문 수출 금지.",
+        desc:"민 아웅 흘라잉 및 군 고위 인사 자산동결. MEHL·MEC 등 군 소유 기업 전면 제재. 에너지·보석·목재 수출 금지.",
         targets:"군부 지도자, 군 소유 기업", frozenAssets:"미국 내 자산 동결" }
     ],
     timeline:[
-      { date:"2023.02", title:"쿠데타 2주년 — 국영 석유기업 추가 제재", desc:"국영 미얀마석유가스기업(MOGE) 추가 제재로 군부 수입 차단.", type:"us" },
-      { date:"2021.03", title:"쿠데타 관련 포괄 제재 발동", desc:"EO 14014 발동. 미얀마군(타트마도) 관련 기업 전면 제재.", type:"us" },
-      { date:"2021.02", title:"군사 쿠데타 발발", desc:"선거 부정 주장 군부 쿠데타. 아웅산 수치 등 문민정부 지도부 체포.", type:"us" }
+      { date:"2023.02", title:"국영 석유기업 추가 제재", desc:"MOGE 추가 제재로 군부 수입 차단.", type:"us" },
+      { date:"2021.02", title:"군사 쿠데타 발발", desc:"아웅산 수치 등 문민정부 지도부 체포. 포괄 제재 발동.", type:"us" }
     ],
     sources:[
-      { org:"미국 OFAC — Burma 제재", type:"미국 정부", desc:"미얀마 제재 프로그램 SDN 목록 및 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/burma-sanctions" },
-      { org:"EU 미얀마 제재", type:"EU 공식", desc:"EU 미얀마 제재 법령 및 지정 목록", url:"https://www.sanctionsmap.eu" }
+      { org:"미국 OFAC — Burma", type:"미국 정부", desc:"미얀마 SDN 목록 및 제재 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/burma-sanctions" }
     ]
   },
-  "VEN": { name:"베네수엘라", flag:"🇻🇪", un:false, us:true, severity:"high", since:"2015",
-    sectors:["석유","금융","정권인사","마약"],
-    summary:"마두로 정권의 민주주의 훼손, 부패, 마약 밀매 관련 미국 제재가 2015년부터 단계적 강화. 2019년 국영 석유기업 PDVSA 제재로 경제적 타격이 극대화되었다.",
+  "CUB":{ name:"쿠바", flag:"🇨🇺", un:false, us:true, severity:"high", since:"1962",
+    sectors:["포괄금수","금융","무역","여행"],
+    summary:"1962년 시작된 세계에서 가장 오래된 경제 제재. 60년 이상 지속된 미국의 대쿠바 무역·금융 금수로, UN 총회는 매년 압도적 표차로 철폐 결의안을 채택하고 있다.",
     sanctions:[
-      { type:"us", title:"Venezuela 제재", authority:"미국 재무부 OFAC",
-        resolutions:"EO 13692, 13808, 13827, 13835, 13850, 13884",
-        desc:"마두로 대통령 및 정권 핵심 인사 자산동결. 국영 석유기업 PDVSA 전면 제재(2019). 금·석유 수출 차단. 마약 밀매 관련 정부 인사 별도 지정.",
-        targets:"마두로 정권 인사, PDVSA 및 관련 기업", frozenAssets:"미국 내 자산 동결, 미국 내 베네수엘라 국유 자산" }
+      { type:"us", title:"Cuba 포괄 제재 (엠바고)", authority:"미국 OFAC + 상무부",
+        resolutions:"TWEA(1917), Cuban Assets Control Regulations, Helms-Burton Act(1996)",
+        desc:"쿠바와의 모든 상업·금융 거래 원칙적 금지. Helms-Burton III조(2019 발동)로 제3국 기업 소송 리스크.",
+        targets:"쿠바 정부 기관 및 군 소유 기업(GAESA 등)", frozenAssets:"미국 내 자산 전면 동결" }
     ],
     timeline:[
-      { date:"2024.10", title:"마두로 재선 논란 후 제재 재강화", desc:"부정 선거 의혹 대선 결과 불인정. 완화했던 석유 제재 일부 재강화.", type:"us" },
-      { date:"2023.10", title:"바베이도스 합의 — 일부 제재 완화", desc:"야당과의 선거 협상 대응 미국이 석유·가스 제재 한시 완화.", type:"us" },
-      { date:"2019.01", title:"PDVSA 제재 — 석유 수출 사실상 차단", desc:"국영 석유공사 전면 제재. 베네수엘라 최대 외화 수입원 차단.", type:"us" }
+      { date:"2021.07", title:"반정부 시위 탄압 관련 추가 제재", desc:"대규모 시위 탄압 군·경찰 지도자 추가 지정.", type:"us" },
+      { date:"2015.07", title:"오바마, 미·쿠바 국교 정상화", desc:"국교 회복 및 여행·송금 규제 완화. 의회 동의 없이 엠바고 해제 불가.", type:"us" },
+      { date:"1962.02", title:"케네디, 전면 금수 선언", desc:"전면 무역 금수 시행. 이후 60년 이상 지속.", type:"us" }
     ],
     sources:[
-      { org:"미국 OFAC — Venezuela 제재", type:"미국 정부", desc:"베네수엘라 제재 프로그램 SDN 목록", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/venezuela-sanctions" }
+      { org:"미국 OFAC — Cuba", type:"미국 정부", desc:"쿠바 자산통제 규정 및 허가 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/cuba-sanctions" }
     ]
   },
-  "SDN": { name:"수단", flag:"🇸🇩", un:true, us:true, severity:"high", since:"2004",
+  "BLR":{ name:"벨라루스", flag:"🇧🇾", un:false, us:true, severity:"medium", since:"2006",
+    sectors:["금융","여행금지","비료","석유","항공"],
+    summary:"2020년 선거 부정·시위 탄압으로 미국·EU 제재 발동. 2021년 라이언에어 강제 착륙, 2022년 러시아 침공 기지 제공으로 대폭 강화됐다.",
+    sanctions:[
+      { type:"us", title:"Belarus 제재", authority:"미국 OFAC",
+        resolutions:"EO 13405, 14038",
+        desc:"루카셴코 및 정권 핵심 인사 자산동결. 이민자 무기화 관련 제재. 러시아 침공 지원 관련 방산 추가 제재.",
+        targets:"루카셴코 일가, 보안군 지도자, 국영기업", frozenAssets:"미국 내 자산 동결" }
+    ],
+    timeline:[
+      { date:"2022.03", title:"러시아 침공 기지 제공 — 제재 강화", desc:"러시아군 우크라이나 침공 기지 제공 관련 추가 제재.", type:"us" },
+      { date:"2021.05", title:"라이언에어 강제 착륙 — 항공 제재", desc:"반정부 활동가 체포 목적 민항기 강제 착륙. EU·미국 항공 제재 확대.", type:"us" },
+      { date:"2020.08", title:"선거 부정·시위 탄압 첫 제재", desc:"대선 부정 및 반정부 시위 무력 탄압 대응.", type:"us" }
+    ],
+    sources:[
+      { org:"미국 OFAC — Belarus", type:"미국 정부", desc:"벨라루스 SDN 목록 및 제재 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/belarus-sanctions" }
+    ]
+  },
+  "VEN":{ name:"베네수엘라", flag:"🇻🇪", un:false, us:true, severity:"high", since:"2015",
+    sectors:["석유","금융","정권인사","마약"],
+    summary:"마두로 정권의 민주주의 훼손·부패·마약 밀매 관련 미국 제재가 2015년부터 단계적 강화. 2019년 PDVSA 제재로 경제적 타격이 극대화됐다.",
+    sanctions:[
+      { type:"us", title:"Venezuela 제재", authority:"미국 OFAC",
+        resolutions:"EO 13692, 13808, 13827, 13835, 13850, 13884",
+        desc:"마두로 및 정권 핵심 인사 자산동결. 국영 석유기업 PDVSA 전면 제재(2019). 금·석유 수출 차단.",
+        targets:"마두로 정권 인사, PDVSA 및 관련 기업", frozenAssets:"미국 내 자산 동결" }
+    ],
+    timeline:[
+      { date:"2024.10", title:"마두로 재선 논란 후 제재 재강화", desc:"부정 선거 의혹 대선 불인정. 석유 제재 일부 재강화.", type:"us" },
+      { date:"2023.10", title:"바베이도스 합의 — 일부 완화", desc:"야당과의 선거 협상으로 석유·가스 제재 한시 완화.", type:"us" },
+      { date:"2019.01", title:"PDVSA 제재 발동", desc:"국영 석유공사 전면 제재. 최대 외화 수입원 차단.", type:"us" }
+    ],
+    sources:[
+      { org:"미국 OFAC — Venezuela", type:"미국 정부", desc:"베네수엘라 SDN 목록", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/venezuela-sanctions" }
+    ]
+  },
+  "SDN":{ name:"수단", flag:"🇸🇩", un:true, us:true, severity:"high", since:"2004",
     sectors:["무기금수","금융","다르푸르"],
-    summary:"다르푸르 분쟁 관련 인권 침해와 무기 확산을 이유로 UN 및 미국 제재 부과. 2023년 군벌 간 내전 발발로 제재가 재강화되는 추세이다.",
+    summary:"다르푸르 분쟁 관련 인권 침해로 UN·미국 제재 부과. 2023년 군벌 간 내전 발발로 재강화 추세.",
     sanctions:[
       { type:"un", title:"UN 다르푸르 제재", authority:"UN 안전보장이사회",
-        resolutions:"결의 1556(2004), 1564(2004), 1591(2006)",
-        desc:"다르푸르 지역 무기 금수. 분쟁 당사자 개인 자산동결 및 여행 금지.",
+        resolutions:"결의 1556(2004), 1591(2006)",
+        desc:"다르푸르 무기 금수. 분쟁 당사자 자산동결·여행금지.",
         targets:"다르푸르 분쟁 당사자", frozenAssets:"개인 자산 동결" },
       { type:"us", title:"Sudan 제재", authority:"미국 OFAC",
         resolutions:"EO 13067, 13400",
-        desc:"수단 정부 기관 및 다르푸르 분쟁 관련 인사 제재. 2017년 일부 해제, 다르푸르 제재는 유지.",
+        desc:"수단 정부 기관 및 다르푸르 관련 인사 제재. 2017년 일부 해제, 다르푸르 제재는 유지.",
         targets:"수단 군부 인사 및 민병대 지도자", frozenAssets:"미국 내 자산 동결" }
     ],
     timeline:[
-      { date:"2023.06", title:"내전 발발 후 제재 강화 논의", desc:"수단군(SAF)과 신속지원군(RSF) 간 무력 충돌. 추가 제재 압박 증가.", type:"both" },
-      { date:"2019.10", title:"미국 일부 제재 해제", desc:"민주화 전환 지원을 위해 일부 경제 제재 해제.", type:"us" }
+      { date:"2023.06", title:"내전 발발 후 제재 강화 논의", desc:"SAF·RSF 간 무력 충돌. 추가 제재 압박 증가.", type:"both" },
+      { date:"2019.10", title:"미국 일부 제재 해제", desc:"민주화 전환 지원 위해 일부 경제 제재 해제.", type:"us" }
     ],
     sources:[
-      { org:"UN 수단제재위원회", type:"UN 공식", desc:"UN 다르푸르 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/1591" },
-      { org:"미국 OFAC — Sudan", type:"미국 정부", desc:"수단 제재 프로그램 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/sudan-and-darfur-sanctions" }
+      { org:"UN 수단제재위원회", type:"UN 공식", desc:"UN 다르푸르 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/1591" }
     ]
   },
-  "SOM": { name:"소말리아", flag:"🇸🇴", un:true, us:true, severity:"high", since:"1992",
+  "SOM":{ name:"소말리아", flag:"🇸🇴", un:true, us:true, severity:"high", since:"1992",
     sectors:["무기금수","테러","해적"],
-    summary:"1992년부터 시작된 세계에서 가장 오래된 UN 무기 금수 대상국. 알샤바브 테러조직 관련 제재와 해적 행위 억제 국제 제재가 병행 적용 중이다.",
+    summary:"1992년부터 이어진 세계 최장 UN 무기 금수 대상국. 알샤바브 관련 제재와 해적 억제 국제 제재가 병행 적용 중.",
     sanctions:[
       { type:"un", title:"소말리아 무기 금수", authority:"UN 안전보장이사회",
-        resolutions:"결의 733(1992), 751(1992), 1844(2008), 2182(2014)",
-        desc:"전면 무기 금수(1992년 이래). 알샤바브 테러 관련 자산동결·여행 금지. 목탄(charcoal) 수출 금지로 알샤바브 자금원 차단.",
+        resolutions:"결의 733(1992), 1844(2008), 2182(2014)",
+        desc:"전면 무기 금수(1992년 이래). 알샤바브 테러 관련 자산동결. 목탄 수출 금지로 알샤바브 자금원 차단.",
         targets:"알샤바브 지도부 및 관련 인사", frozenAssets:"알샤바브 관련 자산" },
       { type:"us", title:"Somalia 제재", authority:"미국 OFAC",
-        resolutions:"EO 13536",
-        desc:"알샤바브 및 평화 위협 세력 자산동결.",
+        resolutions:"EO 13536", desc:"알샤바브 및 평화 위협 세력 자산동결.",
         targets:"알샤바브 및 관련 단체", frozenAssets:"미국 내 자산 동결" }
     ],
     timeline:[
@@ -515,670 +501,629 @@ const sanctionData = {
       { date:"1992.01", title:"첫 UN 무기 금수", desc:"소말리아 내전 대응 UN 결의 733호. 세계 최장 무기 금수 시작.", type:"un" }
     ],
     sources:[
-      { org:"UN 소말리아제재위원회", type:"UN 공식", desc:"소말리아 제재 결의 및 전문가 보고서", url:"https://www.un.org/securitycouncil/sanctions/751" }
+      { org:"UN 소말리아제재위원회", type:"UN 공식", desc:"제재 결의 및 전문가 보고서", url:"https://www.un.org/securitycouncil/sanctions/751" }
     ]
   },
-  "COD": { name:"콩고(DRC)", flag:"🇨🇩", un:true, us:true, severity:"high", since:"2003",
+  "COD":{ name:"콩고(DRC)", flag:"🇨🇩", un:true, us:true, severity:"high", since:"2003",
     sectors:["무기금수","인권","분쟁광물"],
-    summary:"동부 콩고 분쟁 지역의 무장세력과 인권침해 관련 제재. 30년 이상 지속된 내전과 관련하여 UN과 미국이 무기 금수 및 개인 제재를 부과 중이다.",
+    summary:"동부 콩고 무장세력·인권침해 관련 제재. 30년 이상 지속된 내전과 관련하여 UN과 미국이 무기 금수 및 개인 제재를 부과 중.",
     sanctions:[
       { type:"un", title:"DRC 무기 금수 및 개인 제재", authority:"UN 안전보장이사회",
-        resolutions:"결의 1533(2004), 1596(2005), 1698(2006), 2293(2016)",
-        desc:"동부 DRC 무장세력 무기 금수. 분쟁 광물 거래 관련 단체 제재. 인권침해 개인 자산동결·여행 금지.",
+        resolutions:"결의 1533(2004), 1596(2005), 2293(2016)",
+        desc:"동부 DRC 무장세력 무기 금수. 분쟁 광물 거래 단체 제재. 인권침해 개인 자산동결·여행금지.",
         targets:"M23 등 무장세력 및 지도자", frozenAssets:"개인 자산 동결" },
       { type:"us", title:"DRC 제재", authority:"미국 OFAC",
-        resolutions:"EO 13671",
-        desc:"DRC 평화 위협 세력 및 분쟁 광물 거래 관련 단체 제재.",
+        resolutions:"EO 13671", desc:"분쟁 광물 거래 및 인권침해 세력 제재.",
         targets:"무장세력 지도자 및 인권침해자", frozenAssets:"미국 내 자산 동결" }
     ],
     timeline:[
-      { date:"2024.02", title:"M23 재확산 관련 제재 강화 논의", desc:"르완다 지원 M23의 동부 콩고 재장악에 따라 추가 제재 압박.", type:"both" }
+      { date:"2024.02", title:"M23 재확산 — 제재 강화 논의", desc:"르완다 지원 M23 동부 콩고 재장악에 따른 추가 제재 압박.", type:"both" }
     ],
-    sources:[
-      { org:"UN DRC제재위원회", type:"UN 공식", desc:"콩고 제재 결의 및 전문가 보고서", url:"https://www.un.org/securitycouncil/sanctions/1533" }
-    ]
+    sources:[{ org:"UN DRC제재위원회", type:"UN 공식", desc:"제재 결의 및 전문가 보고서", url:"https://www.un.org/securitycouncil/sanctions/1533" }]
   },
-  "CAF": { name:"중앙아프리카공화국", flag:"🇨🇫", un:true, us:true, severity:"high", since:"2013",
-    sectors:["무기금수"],
-    summary:"2013년 종파 분쟁 이후 UN 무기 금수와 개인 제재가 적용되고 있다. 러시아 Wagner 그룹의 개입으로 제재 이행 복잡성이 증가했다.",
-    sanctions:[
-      { type:"un", title:"CAR 무기 금수", authority:"UN 안전보장이사회",
-        resolutions:"결의 2127(2013), 2134(2014), 2399(2018)",
-        desc:"전면 무기 금수. 셀레카·안티발라카 무장세력 지도자 자산동결 및 여행 금지.",
-        targets:"셀레카·안티발라카 무장세력 지도자", frozenAssets:"개인 자산 동결" },
-      { type:"us", title:"CAR 제재", authority:"미국 OFAC",
-        resolutions:"EO 13667",
-        desc:"CAR 분쟁 관련 인권침해자 및 자원 착취 세력 제재.",
-        targets:"무장세력 지도자", frozenAssets:"미국 내 자산 동결" }
-    ],
-    timeline:[
-      { date:"2021.08", title:"러시아 Wagner 그룹 개입 확인", desc:"러시아 용병 그룹의 CAR 내 활동 확인으로 추가 제재 압박.", type:"both" },
-      { date:"2013.12", title:"첫 UN 무기 금수 발동", desc:"종파 분쟁 대응 UN 결의 2127호 채택.", type:"un" }
-    ],
-    sources:[
-      { org:"UN CAR제재위원회", type:"UN 공식", desc:"CAR 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2127" }
-    ]
-  },
-  "MLI": { name:"말리", flag:"🇲🇱", un:true, us:true, severity:"medium", since:"2017",
-    sectors:["무기금수","금융","테러"],
-    summary:"2021년 쿠데타 이후 군사정부에 대한 제재가 강화. Wagner 그룹 개입과 알카에다 연계 무장세력 활동으로 제재 범위가 확대되고 있다.",
-    sanctions:[
-      { type:"un", title:"말리 제재", authority:"UN 안전보장이사회",
-        resolutions:"결의 2374(2017), 2432(2018), 2484(2019)",
-        desc:"말리 평화협정 훼손 행위자 자산동결·여행 금지. 전문가 패널 이행 감시.",
-        targets:"무장세력 지도자 및 평화 훼손자", frozenAssets:"개인 자산 동결" },
-      { type:"us", title:"말리 제재", authority:"미국 OFAC",
-        resolutions:"EO 13882",
-        desc:"말리 쿠데타 군사정부 관련 인사 및 Wagner 연계 단체 제재.",
-        targets:"군사정부 인사 및 Wagner 연계 인물", frozenAssets:"미국 내 자산 동결" }
-    ],
-    timeline:[
-      { date:"2022.01", title:"ECOWAS·EU·미국 쿠데타 제재 강화", desc:"2021년 쿠데타 군사정부에 대한 경제 제재 확대.", type:"both" },
-      { date:"2017.09", title:"UN 결의 2374호 채택", desc:"말리 평화 훼손 행위자 대상 제재 체제 수립.", type:"un" }
-    ],
-    sources:[
-      { org:"UN 말리제재위원회", type:"UN 공식", desc:"말리 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2374" }
-    ]
-  },
-  "LBY": { name:"리비아", flag:"🇱🇾", un:true, us:true, severity:"high", since:"2011",
+  "LBY":{ name:"리비아", flag:"🇱🇾", un:true, us:true, severity:"high", since:"2011",
     sectors:["무기금수","금융","에너지"],
-    summary:"2011년 카다피 정권 붕괴 이후 지속된 내전과 관련하여 UN 무기 금수과 미국 제재가 병행 적용. 동부·서부 양측 모두에 대한 제재가 존재한다.",
+    summary:"2011년 카다피 정권 붕괴 이후 지속된 내전 관련 UN 무기 금수와 미국 제재 병행 적용.",
     sanctions:[
       { type:"un", title:"리비아 무기 금수 및 제재", authority:"UN 안전보장이사회",
-        resolutions:"결의 1970(2011), 2009(2011), 2040(2012), 2174(2014), 2362(2017)",
-        desc:"전면 무기 금수. 카다피 일가 자산동결. 유전 봉쇄·불법 수출 관련 선박 억류 권한.",
+        resolutions:"결의 1970(2011), 2009(2011), 2040(2012), 2174(2014)",
+        desc:"전면 무기 금수. 카다피 일가 자산동결. 유전 봉쇄 선박 억류 권한.",
         targets:"카다피 일가 및 내전 세력 지도자", frozenAssets:"카다피 자산 약 150억달러 이상" },
       { type:"us", title:"Libya 제재", authority:"미국 OFAC",
-        resolutions:"EO 13566",
-        desc:"리비아 안정 위협 세력 개인 제재. 유전 방해 세력 추가 지정.",
+        resolutions:"EO 13566", desc:"리비아 안정 위협 세력 제재.",
         targets:"무장세력 및 인신매매 조직", frozenAssets:"미국 내 자산 동결" }
     ],
-    timeline:[
-      { date:"2011.03", title:"카다피 정권 붕괴 및 첫 제재", desc:"UN 결의 1970호. 카다피 일가 자산동결, 무기 금수, ICC 회부.", type:"un" }
-    ],
-    sources:[
-      { org:"UN 리비아제재위원회", type:"UN 공식", desc:"리비아 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/1970" }
-    ]
+    timeline:[{ date:"2011.03", title:"UN 결의 1970호 — 첫 제재", desc:"카다피 일가 자산동결, 무기 금수, ICC 회부.", type:"un" }],
+    sources:[{ org:"UN 리비아제재위원회", type:"UN 공식", desc:"제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/1970" }]
   },
-  "YEM": { name:"예멘", flag:"🇾🇪", un:true, us:true, severity:"high", since:"2014",
+  "YEM":{ name:"예멘", flag:"🇾🇪", un:true, us:true, severity:"high", since:"2014",
     sectors:["무기금수","금융","테러"],
-    summary:"후티 반군과 전 대통령 살레 세력에 대한 UN 제재가 2014년부터 적용. 미국은 후티를 테러조직으로 별도 지정. 홍해 선박 공격으로 2024년 추가 제재가 부과되었다.",
+    summary:"후티 반군 관련 UN 제재와 미국의 테러조직 지정이 병행 적용. 2024년 홍해 선박 공격으로 제재가 추가 강화됐다.",
     sanctions:[
       { type:"un", title:"예멘 제재", authority:"UN 안전보장이사회",
         resolutions:"결의 2140(2014), 2216(2015)",
-        desc:"후티 반군 지도자 자산동결·여행 금지. 예멘 무기 금수. 이란의 후티 무기 지원 경로 차단.",
+        desc:"후티 지도자 자산동결·여행금지. 무기 금수. 이란의 후티 지원 경로 차단.",
         targets:"후티 지도부, 살레 전 대통령 세력", frozenAssets:"개인 자산 동결" },
-      { type:"us", title:"Yemen 제재 + 후티 테러조직 지정", authority:"미국 OFAC + 국무부",
+      { type:"us", title:"Yemen + 후티 테러조직 지정", authority:"미국 OFAC + 국무부",
         resolutions:"EO 13611, EO 14078(2024)",
-        desc:"후티 반군(안사르 알라) 테러조직 지정. 이란 지원 네트워크 제재. 홍해 선박 공격 관련 추가 제재.",
+        desc:"후티(안사르 알라) 테러조직 지정. 홍해 선박 공격 관련 추가 제재.",
         targets:"후티 지도부 및 이란 지원 네트워크", frozenAssets:"미국 내 자산 동결" }
     ],
     timeline:[
-      { date:"2024.01", title:"후티 홍해 공격 대응 추가 제재", desc:"수에즈 운하 우회 선박 공격 대응 미국·영국 추가 제재 발동.", type:"us" },
-      { date:"2014.11", title:"UN 결의 2140호 — 예멘 제재 체제 수립", desc:"분쟁 당사자 자산동결 및 여행 금지 체제 수립.", type:"un" }
+      { date:"2024.01", title:"홍해 공격 대응 추가 제재", desc:"수에즈 운하 우회 선박 공격 대응 미국·영국 추가 제재.", type:"us" },
+      { date:"2014.11", title:"UN 결의 2140호 — 제재 체제 수립", desc:"분쟁 당사자 자산동결·여행금지 체제.", type:"un" }
     ],
-    sources:[
-      { org:"UN 예멘제재위원회", type:"UN 공식", desc:"예멘 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2140" }
-    ]
+    sources:[{ org:"UN 예멘제재위원회", type:"UN 공식", desc:"제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2140" }]
   },
-  "SSD": { name:"남수단", flag:"🇸🇸", un:true, us:true, severity:"high", since:"2015",
-    sectors:["무기금수","금융"],
-    summary:"2013년 내전 이후 UN과 미국이 제재 부과. 2018년 전면 무기 금수가 발동되었으며, 지속적인 분쟁 속에 유지 중이다.",
-    sanctions:[
-      { type:"un", title:"남수단 무기 금수 및 제재", authority:"UN 안전보장이사회",
-        resolutions:"결의 2206(2015), 2290(2016), 2353(2017), 2428(2018)",
-        desc:"내전 당사자 개인 자산동결·여행 금지. 2018년 전면 무기 금수 발동.",
-        targets:"내전 주도 세력 지도자", frozenAssets:"개인 자산 동결" },
-      { type:"us", title:"South Sudan 제재", authority:"미국 OFAC",
-        resolutions:"EO 13664",
-        desc:"남수단 분쟁 관련 인권침해자 및 평화 훼손 세력 제재.",
-        targets:"내전 지도자", frozenAssets:"미국 내 자산 동결" }
-    ],
-    timeline:[
-      { date:"2018.07", title:"UN 전면 무기 금수 발동", desc:"평화협정 이행 실패 후 전면 무기 금수 발동.", type:"un" },
-      { date:"2015.03", title:"UN 결의 2206호 — 제재 체제 수립", desc:"남수단 내전 대응 개인 제재 체제 수립.", type:"un" }
-    ],
-    sources:[
-      { org:"UN 남수단제재위원회", type:"UN 공식", desc:"남수단 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2206" }
-    ]
-  },
-  "HTI": { name:"아이티", flag:"🇭🇹", un:true, us:true, severity:"medium", since:"2022",
+  "HTI":{ name:"아이티", flag:"🇭🇹", un:true, us:true, severity:"medium", since:"2022",
     sectors:["금융","여행금지","갱단"],
-    summary:"2022년 갱단 지도자 지미즈를 중심으로 한 폭력 사태 관련 UN과 미국이 개인 제재 부과. 2023년 케냐 주도 다국적 치안 지원 임무가 승인되었다.",
+    summary:"2022년 갱단 지도자 지미즈 중심의 폭력 사태 관련 UN·미국 개인 제재. 2023년 케냐 주도 다국적 치안 지원 임무 승인.",
     sanctions:[
       { type:"un", title:"아이티 개인 제재", authority:"UN 안전보장이사회",
         resolutions:"결의 2653(2022), 2699(2023)",
-        desc:"갱단 지도자 지미즈(Jimmy Chérizier) 등 자산동결·여행 금지. 2023년 케냐 주도 다국적군 파견 승인.",
+        desc:"갱단 지도자 지미즈 등 자산동결·여행금지. 2023년 케냐 주도 다국적군 파견 승인.",
         targets:"갱단 지도자 및 부패 정치인", frozenAssets:"개인 자산 동결" },
       { type:"us", title:"Haiti 제재", authority:"미국 OFAC",
-        resolutions:"EO 14059",
-        desc:"갱단 지도자 및 부패 정치인, 마약 밀매 연계 인사 제재.",
+        resolutions:"EO 14059", desc:"갱단·부패 정치인·마약 연계 인사 제재.",
         targets:"갱단 지도자 및 마약 연계 인사", frozenAssets:"미국 내 자산 동결" }
     ],
     timeline:[
-      { date:"2023.10", title:"케냐 주도 다국적군 파견 승인", desc:"UN 결의 2699호. 케냐 주도 다국적 치안 지원 임무 승인.", type:"un" },
-      { date:"2022.10", title:"UN 결의 2653호 — 첫 아이티 제재", desc:"갱단 지도자 지미즈 등 첫 개인 제재 발동.", type:"un" }
+      { date:"2023.10", title:"케냐 주도 다국적군 파견 승인", desc:"UN 결의 2699호. 케냐 주도 다국적 치안 지원 임무.", type:"un" },
+      { date:"2022.10", title:"UN 첫 아이티 제재", desc:"갱단 지도자 지미즈 등 첫 개인 제재 발동.", type:"un" }
     ],
-    sources:[
-      { org:"UN 아이티제재위원회", type:"UN 공식", desc:"아이티 제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2653" }
-    ]
+    sources:[{ org:"UN 아이티제재위원회", type:"UN 공식", desc:"제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2653" }]
   },
-  "GIN": { name:"기니", flag:"🇬🇳", un:true, us:false, severity:"medium", since:"2008",
+  "SSD":{ name:"남수단", flag:"🇸🇸", un:true, us:true, severity:"high", since:"2015",
+    sectors:["무기금수","금융"],
+    summary:"2013년 내전 이후 UN·미국 제재 부과. 2018년 전면 무기 금수 발동.",
+    sanctions:[
+      { type:"un", title:"남수단 무기 금수 및 제재", authority:"UN 안전보장이사회",
+        resolutions:"결의 2206(2015), 2428(2018)",
+        desc:"내전 당사자 자산동결·여행금지. 2018년 전면 무기 금수 발동.",
+        targets:"내전 주도 세력 지도자", frozenAssets:"개인 자산 동결" },
+      { type:"us", title:"South Sudan 제재", authority:"미국 OFAC",
+        resolutions:"EO 13664", desc:"분쟁 관련 인권침해자 제재.",
+        targets:"내전 지도자", frozenAssets:"미국 내 자산 동결" }
+    ],
+    timeline:[{ date:"2018.07", title:"UN 전면 무기 금수", desc:"평화협정 이행 실패 후 전면 무기 금수 발동.", type:"un" }],
+    sources:[{ org:"UN 남수단제재위원회", type:"UN 공식", desc:"제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2206" }]
+  },
+  "MLI":{ name:"말리", flag:"🇲🇱", un:true, us:true, severity:"medium", since:"2017",
+    sectors:["무기금수","금융","테러"],
+    summary:"2021년 쿠데타 이후 군사정부 제재 강화. Wagner 그룹 개입·알카에다 연계 무장세력으로 제재 범위 확대.",
+    sanctions:[
+      { type:"un", title:"말리 제재", authority:"UN 안전보장이사회",
+        resolutions:"결의 2374(2017), 2432(2018), 2484(2019)",
+        desc:"평화협정 훼손 행위자 자산동결·여행금지.",
+        targets:"무장세력 지도자 및 평화 훼손자", frozenAssets:"개인 자산 동결" },
+      { type:"us", title:"말리 제재", authority:"미국 OFAC",
+        resolutions:"EO 13882", desc:"쿠데타 군사정부 및 Wagner 연계 단체 제재.",
+        targets:"군사정부 인사 및 Wagner 연계 인물", frozenAssets:"미국 내 자산 동결" }
+    ],
+    timeline:[{ date:"2022.01", title:"쿠데타 관련 제재 강화", desc:"2021년 쿠데타 군사정부에 대한 경제 제재 확대.", type:"both" }],
+    sources:[{ org:"UN 말리제재위원회", type:"UN 공식", desc:"제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2374" }]
+  },
+  "CAF":{ name:"중앙아프리카공화국", flag:"🇨🇫", un:true, us:true, severity:"high", since:"2013",
+    sectors:["무기금수"],
+    summary:"2013년 종파 분쟁 이후 UN 무기 금수와 개인 제재 적용. 러시아 Wagner 그룹 개입으로 제재 이행 복잡성 증가.",
+    sanctions:[
+      { type:"un", title:"CAR 무기 금수", authority:"UN 안전보장이사회",
+        resolutions:"결의 2127(2013), 2134(2014)",
+        desc:"전면 무기 금수. 셀레카·안티발라카 무장세력 지도자 자산동결·여행금지.",
+        targets:"셀레카·안티발라카 무장세력 지도자", frozenAssets:"개인 자산 동결" },
+      { type:"us", title:"CAR 제재", authority:"미국 OFAC",
+        resolutions:"EO 13667", desc:"분쟁 관련 인권침해자 및 자원 착취 세력 제재.",
+        targets:"무장세력 지도자", frozenAssets:"미국 내 자산 동결" }
+    ],
+    timeline:[{ date:"2013.12", title:"첫 UN 무기 금수 발동", desc:"종파 분쟁 대응 UN 결의 2127호 채택.", type:"un" }],
+    sources:[{ org:"UN CAR제재위원회", type:"UN 공식", desc:"제재 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2127" }]
+  },
+  "GNB":{ name:"기니비사우", flag:"🇬🇼", un:true, us:true, severity:"medium", since:"2012",
+    sectors:["여행금지","마약"],
+    summary:"2012년 쿠데타 이후 UN 여행 금지 제재 발동. 마약 밀매 거점 역할 관련 미국 독자 제재 별도 적용.",
+    sanctions:[
+      { type:"un", title:"기니비사우 여행 금지", authority:"UN 안전보장이사회",
+        resolutions:"결의 2048(2012)", desc:"쿠데타 주도 군부 인사 여행 금지.",
+        targets:"쿠데타 군부 지도자", frozenAssets:"없음 (여행금지만)" },
+      { type:"us", title:"마약 밀매 관련 제재", authority:"미국 OFAC",
+        resolutions:"FSNPA", desc:"마약 밀매 조직 제재.",
+        targets:"마약 밀매 조직 지도자", frozenAssets:"미국 내 자산 동결" }
+    ],
+    timeline:[{ date:"2012.05", title:"UN 결의 2048호 — 쿠데타 대응", desc:"군사 쿠데타 대응 여행 금지 발동.", type:"un" }],
+    sources:[{ org:"UN 기니비사우제재위원회", type:"UN 공식", desc:"관련 결의 및 지정 목록", url:"https://www.un.org/securitycouncil/sanctions/2048" }]
+  },
+  "GIN":{ name:"기니", flag:"🇬🇳", un:true, us:false, severity:"medium", since:"2008",
     sectors:["무기금수(완화됨)"],
-    summary:"2008~2009년 쿠데타 및 민간인 학살 관련 과거 UN 무기 금수가 발동되었으며, 현재는 대부분 해제된 상태. 2021년 쿠데타 이후 EU·ECOWAS 독자 제재 유지 중.",
+    summary:"2008~2009년 쿠데타 관련 과거 UN 무기 금수가 발동됐으나 현재 대부분 해제. 2021년 쿠데타 이후 EU·ECOWAS 독자 제재 유지 중.",
     sanctions:[
       { type:"un", title:"기니 무기 금수 (현재 완화)", authority:"UN 안전보장이사회",
         resolutions:"결의 1819(2008) — 이후 단계적 완화",
-        desc:"2009년 민간인 학살 관련 무기 금수 발동. 민주화 이행에 따라 단계적 완화.",
+        desc:"2009년 민간인 학살 관련 무기 금수. 민주화 이행에 따라 단계적 완화.",
         targets:"쿠데타 군부", frozenAssets:"없음 (현재 대부분 해제)" }
     ],
-    timeline:[
-      { date:"2021.09", title:"쿠데타 발생 — EU·ECOWAS 제재", desc:"알파 콩데 전 대통령 축출 쿠데타. UN 제재 없으나 EU·ECOWAS 독자 제재.", type:"un" },
-      { date:"2010.12", title:"민주 선거 후 UN 무기 금수 완화", desc:"민주 선거 이행 확인 후 UN 무기 금수 단계적 완화.", type:"un" }
-    ],
-    sources:[
-      { org:"UN 안보리", type:"UN 공식", desc:"기니 관련 UN 결의 정보", url:"https://www.un.org/securitycouncil/" }
-    ]
+    timeline:[{ date:"2010.12", title:"민주 선거 후 UN 무기 금수 완화", desc:"민주 선거 이행 확인 후 단계적 완화.", type:"un" }],
+    sources:[{ org:"UN 안보리", type:"UN 공식", desc:"기니 관련 UN 결의 정보", url:"https://www.un.org/securitycouncil/" }]
   },
-  "ERI": { name:"에리트레아", flag:"🇪🇷", un:true, us:false, severity:"medium", since:"2009",
-    sectors:["무기금수(해제됨)","인권"],
-    summary:"소말리아 분쟁 개입 관련 2009년 UN 무기 금수이 발동되었으나, 2018년 에티오피아와의 평화협정 체결 후 해제. 인권 문제로 EU 독자 제재는 여전히 유지 중.",
+  "ERI":{ name:"에리트레아", flag:"🇪🇷", un:true, us:false, severity:"medium", since:"2009",
+    sectors:["무기금수(해제됨)"],
+    summary:"소말리아 분쟁 개입 관련 2009년 UN 무기 금수 발동. 2018년 에티오피아와의 평화협정 체결 후 해제됨.",
     sanctions:[
       { type:"un", title:"에리트레아 무기 금수 (2018년 해제)", authority:"UN 안전보장이사회",
-        resolutions:"결의 1907(2009), 2023(2011) — 결의 2444(2018)로 해제",
-        desc:"소말리아 알샤바브 지원 의혹 관련 무기 금수 및 개인 제재. 에티오피아와의 평화협정 후 2018년 해제.",
+        resolutions:"결의 1907(2009) — 결의 2444(2018)로 해제",
+        desc:"소말리아 알샤바브 지원 의혹 관련 무기 금수. 평화협정 후 2018년 해제.",
         targets:"에리트레아 정부 인사", frozenAssets:"개인 자산 동결 (현재 해제)" }
     ],
     timeline:[
-      { date:"2018.11", title:"UN 제재 해제", desc:"에리트레아-에티오피아 평화협정 체결 후 UN 결의 2444호로 제재 해제.", type:"un" },
-      { date:"2009.12", title:"UN 결의 1907호 — 무기 금수 발동", desc:"소말리아 분쟁 개입 관련 첫 제재 발동.", type:"un" }
+      { date:"2018.11", title:"UN 제재 해제", desc:"에리트레아-에티오피아 평화협정 체결 후 결의 2444호로 해제.", type:"un" },
+      { date:"2009.12", title:"UN 결의 1907호 발동", desc:"소말리아 분쟁 개입 관련 첫 제재.", type:"un" }
     ],
-    sources:[
-      { org:"UN 안보리", type:"UN 공식", desc:"에리트레아 관련 결의 정보", url:"https://www.un.org/securitycouncil/" }
-    ]
+    sources:[{ org:"UN 안보리", type:"UN 공식", desc:"에리트레아 관련 결의 정보", url:"https://www.un.org/securitycouncil/" }]
   },
-  "NIC": { name:"니카라과", flag:"🇳🇮", un:false, us:true, severity:"medium", since:"2018",
+  "NIC":{ name:"니카라과", flag:"🇳🇮", un:false, us:true, severity:"medium", since:"2018",
     sectors:["금융","정권인사"],
-    summary:"오르테가 대통령의 권위주의 통치, 선거 부정, 반정부 인사 탄압과 관련하여 미국이 개인 및 기관 제재를 부과하고 있다.",
+    summary:"오르테가 대통령의 권위주의 통치·선거 부정·반정부 인사 탄압 관련 미국 제재.",
     sanctions:[
       { type:"us", title:"Nicaragua 제재 (NICA Act)", authority:"미국 OFAC + 국무부",
         resolutions:"EO 13851, NICA Act(2018), RENACER Act(2021)",
-        desc:"오르테가 대통령 가족 포함 정권 핵심 인사 자산동결. 경찰·정보기관 지도자 제재. 국제금융기관의 니카라과 대출 반대 의무화.",
+        desc:"오르테가 가족 포함 정권 핵심 인사 자산동결. 경찰·정보기관 지도자 제재.",
         targets:"오르테가 일가, 경찰·정보기관 지도자", frozenAssets:"미국 내 자산 동결" }
     ],
-    timeline:[
-      { date:"2023.11", title:"경쟁 없는 대선 관련 추가 제재", desc:"야당 후보 부재 대선 강행 관련 추가 인사 제재.", type:"us" },
-      { date:"2018.10", title:"NICA Act 발동", desc:"2018년 반정부 시위 탄압(약 300명 사망) 대응 첫 제재.", type:"us" }
-    ],
-    sources:[
-      { org:"미국 OFAC — Nicaragua", type:"미국 정부", desc:"니카라과 제재 프로그램 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/nicaragua-sanctions" }
-    ]
+    timeline:[{ date:"2018.10", title:"NICA Act 발동", desc:"2018년 반정부 시위 탄압(약 300명 사망) 대응 첫 제재.", type:"us" }],
+    sources:[{ org:"미국 OFAC — Nicaragua", type:"미국 정부", desc:"니카라과 제재 프로그램 안내", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/nicaragua-sanctions" }]
   },
-  "ZWE": { name:"짐바브웨", flag:"🇿🇼", un:false, us:true, severity:"medium", since:"2003",
+  "ZWE":{ name:"짐바브웨", flag:"🇿🇼", un:false, us:true, severity:"medium", since:"2003",
     sectors:["금융","여행금지"],
-    summary:"무가베 전 대통령 시절 토지 강탈과 민주주의 훼손을 이유로 2003년부터 미국·EU 제재 적용. 현재는 핵심 인사 개인 제재 위주로 축소된 상태.",
+    summary:"무가베 전 대통령 시절 토지 강탈·민주주의 훼손으로 2003년부터 미국·EU 제재. 현재 핵심 인사 개인 제재 위주로 축소.",
     sanctions:[
       { type:"us", title:"Zimbabwe 제재", authority:"미국 OFAC",
         resolutions:"EO 13288, 13391, 13469",
-        desc:"무가베 전 대통령 측근 및 인권침해자 자산동결·여행 금지. 토지 강탈 관련 개인 제재. 현재 약 100명 이하로 축소.",
+        desc:"무가베 측근 및 인권침해자 자산동결·여행금지. 현재 약 100명 이하로 축소.",
         targets:"전직 무가베 측근 및 인권침해자", frozenAssets:"미국 내 개인 자산 동결" }
     ],
-    timeline:[
-      { date:"2023.03", title:"일부 개인 제재 추가 해제", desc:"민주화 진전 인정, 일부 제재 해제. 핵심 인사 제재는 유지.", type:"us" },
-      { date:"2003.03", title:"Zimbabwe Democracy Act — 첫 제재", desc:"토지 강탈 및 선거 부정 대응 첫 제재 발동.", type:"us" }
-    ],
-    sources:[
-      { org:"미국 OFAC — Zimbabwe", type:"미국 정부", desc:"짐바브웨 제재 프로그램 SDN 목록", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/zimbabwe-sanctions" }
-    ]
+    timeline:[{ date:"2003.03", title:"Zimbabwe Democracy Act — 첫 제재", desc:"토지 강탈 및 선거 부정 대응 첫 제재 발동.", type:"us" }],
+    sources:[{ org:"미국 OFAC — Zimbabwe", type:"미국 정부", desc:"짐바브웨 SDN 목록", url:"https://ofac.treasury.gov/sanctions-programs-and-country-information/zimbabwe-sanctions" }]
   }
 };
 
 // ── 상태 ──
-let activeFilters = { both:true, un:true, us:true };
-let currentView = 'all';
-let selectedCountry = null;
-const aiCache = {}; // 국가별 AI 결과 캐시
+let filters = {both:true, un:true, us:true};
+let view = 'all';
+let currentISO = null;
+const aiCache = {};
+let savedKey = '';
 
-function getCategory(d) {
-  if (!d) return 'neutral';
-  if (d.un && d.us) return 'both';
-  if (d.un) return 'un';
-  if (d.us) return 'us';
-  return 'neutral';
+// localStorage에서 키 복원 (GitHub Pages 배포용)
+try { savedKey = localStorage.getItem('sanction_api_key') || ''; } catch(e) {}
+
+function getCat(d){ if(!d) return 'neutral'; if(d.un&&d.us) return 'both'; if(d.un) return 'un'; if(d.us) return 'us'; return 'neutral'; }
+function isVis(d){ if(!d) return false; const c=getCat(d); if(view==='un_only'&&!d.un) return false; if(view==='us_only'&&!d.us) return false; if(c==='neutral') return false; if(!filters[c==='both'?'both':c==='un'?'un':'us']) return false; return true; }
+
+// ── 사이드바 ──
+function buildList(){
+  const all = Object.values(SD);
+  document.getElementById('cnt-un').textContent = all.filter(d=>d.un).length;
+  document.getElementById('cnt-us').textContent = all.filter(d=>d.us).length;
+  document.getElementById('cnt-both').textContent = all.filter(d=>d.un&&d.us).length;
+  document.getElementById('fc-both').textContent = all.filter(d=>d.un&&d.us).length;
+  document.getElementById('fc-un').textContent = all.filter(d=>d.un&&!d.us).length;
+  document.getElementById('fc-us').textContent = all.filter(d=>!d.un&&d.us).length;
+  document.getElementById('vis-cnt').textContent = all.filter(isVis).length;
+  const order = {both:0,un:1,us:2};
+  const sorted = Object.entries(SD).sort((a,b)=> order[getCat(a[1])]-order[getCat(b[1])] || a[1].name.localeCompare(b[1].name,'ko'));
+  document.getElementById('clist').innerHTML = sorted.map(([iso,d]) => {
+    const hidden = !isVis(d);
+    return '<div class="citem'+(currentISO===iso?' on':'')+'" id="ci-'+iso+'" onclick="openDrawer(\''+iso+'\')" '+(hidden?'style="opacity:.2;pointer-events:none"':'')+'>'+
+      '<span class="cflag">'+d.flag+'</span><span>'+d.name+'</span>'+
+      '<span class="cbadges">'+(d.un?'<span class="badge badge-un">UN</span>':'')+(d.us?'<span class="badge badge-us">US</span>':'')+'</span>'+
+    '</div>';
+  }).join('');
 }
-function isVisible(d) {
-  if (!d) return false;
-  const cat = getCategory(d);
-  if (currentView === 'un_only' && !d.un) return false;
-  if (currentView === 'us_only' && !d.us) return false;
-  if (!activeFilters[cat === 'both' ? 'both' : cat === 'un' ? 'un' : 'us']) return false;
-  return true;
+
+function toggleFilter(type){
+  filters[type] = !filters[type];
+  document.getElementById('fbtn-'+type).classList.toggle('on', filters[type]);
+  updateColors(); buildList();
+}
+function setView(v){
+  view = v;
+  document.querySelectorAll('.vtbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('vt-'+(v==='all'?'all':v==='un_only'?'un':'us')).classList.add('on');
+  updateColors(); buildList();
 }
 
 // ── DRAWER ──
-function openDrawer(iso) {
-  selectedCountry = iso;
-  const d = sanctionData[iso];
-  if (!d) return;
+function openDrawer(iso){
+  currentISO = iso;
+  const d = SD[iso];
+  if(!d) return;
   renderDrawer(d);
   document.getElementById('drawer').classList.add('open');
-  document.getElementById('drawer-overlay').classList.add('open');
-  d3.selectAll('.country-path').classed('highlighted', false);
-  d3.select(`#c-${iso}`).classed('highlighted', true);
-  document.querySelectorAll('.country-item').forEach(el => el.classList.remove('selected'));
-  const li = document.getElementById(`li-${iso}`);
-  if (li) { li.classList.add('selected'); li.scrollIntoView({ block:'nearest' }); }
-
-  // 드로어 열자마자 백그라운드에서 AI 조회 시작 (캐시 없을 때만)
-  if (!aiCache[d.name]) {
-    fetchLatestSanctions(d.name, iso, false);
-  }
+  document.getElementById('drw-overlay').classList.add('open');
+  d3.selectAll('.country-path').classed('hl',false);
+  d3.select('#cp-'+iso).classed('hl',true);
+  document.querySelectorAll('.citem').forEach(el=>el.classList.remove('on'));
+  const ci = document.getElementById('ci-'+iso);
+  if(ci){ ci.classList.add('on'); ci.scrollIntoView({block:'nearest'}); }
 }
-
-function closeDrawer() {
+function closeDrawer(){
   document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drawer-overlay').classList.remove('open');
-  d3.selectAll('.country-path').classed('highlighted', false);
-  document.querySelectorAll('.country-item').forEach(el => el.classList.remove('selected'));
-  selectedCountry = null;
+  document.getElementById('drw-overlay').classList.remove('open');
+  d3.selectAll('.country-path').classed('hl',false);
+  document.querySelectorAll('.citem').forEach(el=>el.classList.remove('on'));
+  currentISO = null;
+}
+function switchTab(idx){
+  document.querySelectorAll('.dtab').forEach((t,j)=>t.classList.toggle('on',j===idx));
+  document.querySelectorAll('.tab-pane').forEach((p,j)=>p.classList.toggle('on',j===idx));
+  // AI 탭 클릭 시 자동 조회
+  if(idx===4) autoFetchIfReady();
 }
 
-function switchTab(idx) {
-  document.querySelectorAll('.dtab').forEach((t,i) => t.classList.toggle('active', i===idx));
-  document.querySelectorAll('.tab-pane').forEach((p,i) => p.classList.toggle('active', i===idx));
+function renderDrawer(d){
+  const cat = getCat(d);
+  const catLabel = {both:'UN + 미국 동시 제재', un:'UN 단독 제재', us:'미국 단독 제재'}[cat];
+  const catColor = {both:'var(--both)', un:'var(--un)', us:'var(--us)'}[cat];
+  const catBg = {both:'rgba(196,77,255,.1)', un:'rgba(59,158,255,.1)', us:'rgba(255,79,79,.1)'}[cat];
+  const tc = {un:'var(--un)',us:'var(--us)',both:'var(--both)'};
+  const tb = {un:'rgba(59,158,255,.1)',us:'rgba(255,79,79,.1)',both:'rgba(196,77,255,.1)'};
+  const tl = {un:'UN',us:'미국',both:'UN·미국'};
+
+  document.getElementById('drw-head').innerHTML =
+    '<button class="drw-close" onclick="closeDrawer()">✕</button>'+
+    '<span class="drw-flag">'+d.flag+'</span>'+
+    '<div class="drw-name">'+d.name+'</div>'+
+    '<span class="drw-cat" style="color:'+catColor+';background:'+catBg+';border:1px solid '+catColor+'55">'+catLabel+'</span>';
+
+  const sevCls = {critical:'sev-critical',high:'sev-high',medium:'sev-medium'}[d.severity] || 'sev-medium';
+  const sevLbl = (d.severity||'medium').toUpperCase();
+
+  // TAB 0: 개요
+  const t0 =
+    '<div class="tab-pane on">'+
+      '<div class="ov-summary">'+d.summary+'</div>'+
+      '<div class="info-block">'+
+        '<div class="ib-title">// 기본 정보</div>'+
+        '<div class="info-row"><span class="ikey">최초 제재</span><span class="ival">'+(d.since||'-')+'년</span></div>'+
+        '<div class="info-row"><span class="ikey">제재 유형</span><span class="ival" style="color:'+catColor+'">'+catLabel+'</span></div>'+
+        '<div class="info-row"><span class="ikey">위험 등급</span><span class="ival"><span class="sev-badge '+sevCls+'">'+sevLbl+'</span></span></div>'+
+        '<div class="info-row"><span class="ikey">제재 분야</span><span class="ival"><div class="stags">'+(d.sectors||[]).map(function(s){return '<span class="stag">'+s+'</span>';}).join('')+'</div></span></div>'+
+      '</div>'+
+    '</div>';
+
+  // TAB 1: 제재 내용
+  var sanctionsHtml = (d.sanctions||[]).map(function(s){
+    return '<div class="sblk '+s.type+'">'+
+      '<div class="sb-hd"><div class="sb-ico">'+(s.type==='un'?'🇺🇳':'🇺🇸')+'</div>'+
+      '<div><div class="sb-ttl">'+s.title+'</div><div class="sb-sub">'+s.authority+'</div></div></div>'+
+      '<div class="sb-desc">'+s.desc+'</div>'+
+      '<div class="sb-rows">'+
+        '<div class="sb-row"><span class="sbk">근거 법령</span><span class="sbv" style="font-family:var(--mono);font-size:9px;color:var(--txt3)">'+s.resolutions+'</span></div>'+
+        '<div class="sb-row"><span class="sbk">제재 대상</span><span class="sbv">'+s.targets+'</span></div>'+
+        '<div class="sb-row"><span class="sbk">동결 자산</span><span class="sbv">'+s.frozenAssets+'</span></div>'+
+      '</div></div>';
+  }).join('');
+  const t1 = '<div class="tab-pane">'+sanctionsHtml+'</div>';
+
+  // TAB 2: 제재 일지
+  var timelineHtml = (d.timeline||[]).map(function(t){
+    return '<div class="tl-item">'+
+      '<div class="tl-dot '+(t.type||'us')+'"></div>'+
+      '<div class="tl-date">'+t.date+'</div>'+
+      '<div class="tl-ttl">'+t.title+'</div>'+
+      '<div class="tl-desc">'+t.desc+'</div>'+
+      '<span class="tl-tag" style="color:'+(tc[t.type]||tc.us)+';background:'+(tb[t.type]||tb.us)+';border:1px solid '+(tc[t.type]||tc.us)+'44">'+(tl[t.type]||'제재')+'</span>'+
+    '</div>';
+  }).join('');
+  const t2 = '<div class="tab-pane" id="tab-timeline">'+
+    '<div class="tl-header static"><span>📅 제재 일지 (✦ 최신동향 탭 조회 시 최신 정보로 업데이트됨)</span></div>'+
+    '<div class="timeline">'+timelineHtml+'</div></div>';
+
+  // TAB 3: 출처
+  var sourcesHtml = (d.sources||[]).map(function(s){
+    return '<div class="src-item">'+
+      '<div class="src-org">'+s.org+'</div>'+
+      '<span class="src-type" style="background:rgba(0,212,255,.08);color:var(--acc);border:1px solid rgba(0,212,255,.2)">'+s.type+'</span>'+
+      '<div class="src-desc">'+s.desc+'</div>'+
+      '<a href="'+s.url+'" target="_blank" class="src-link">🔗 공식 출처 바로가기 ↗</a>'+
+    '</div>';
+  }).join('');
+  const t3 = '<div class="tab-pane">'+sourcesHtml+
+    '<div class="disclaimer">※ 본 정보는 참고용이며, 실제 제재 준수 여부는 반드시 공식 출처 및 법률 전문가를 통해 확인하시기 바랍니다.</div></div>';
+
+  // TAB 4: AI 최신동향
+  const t4 = '<div class="tab-pane" id="tab-ai"><div class="ai-panel" id="ai-panel">'+buildAiTab(d.name)+'</div></div>';
+
+  document.getElementById('drw-body').innerHTML = t0 + t1 + t2 + t3 + t4;
+
+  // 탭 첫 번째 활성화
+  document.querySelectorAll('.dtab').forEach(function(t,i){ t.classList.toggle('on', i===0); });
 }
 
-function renderDrawer(d) {
-  const cat = getCategory(d);
-  const catLabel = { both:'UN + 미국 동시 제재', un:'UN 단독 제재', us:'미국 단독 제재' }[cat];
-  const catColor = { both:'var(--both-color)', un:'var(--un-color)', us:'var(--us-color)' }[cat];
-  const catBg = { both:'rgba(196,77,255,0.1)', un:'rgba(59,158,255,0.1)', us:'rgba(255,79,79,0.1)' }[cat];
-
-  document.getElementById('drawer-head').innerHTML = `
-    <button class="drawer-close" onclick="closeDrawer()">✕</button>
-    <span class="drawer-flag">${d.flag}</span>
-    <div class="drawer-country">${d.name}</div>
-    <span class="drawer-cat" style="color:${catColor}; background:${catBg}; border:1px solid ${catColor}44;">${catLabel}</span>`;
-
-  document.querySelectorAll('.dtab').forEach((t,i) => t.classList.toggle('active', i===0));
-
-  const sevClass = { critical:'sev-critical', high:'sev-high', medium:'sev-medium' }[d.severity];
-  const sevLabel = { critical:'CRITICAL', high:'HIGH', medium:'MEDIUM' }[d.severity];
-
-  const typeColor = { un:'var(--un-color)', us:'var(--us-color)', both:'var(--both-color)' };
-  const typeBg = { un:'rgba(59,158,255,0.1)', us:'rgba(255,79,79,0.1)', both:'rgba(196,77,255,0.1)' };
-  const typeLabel = { un:'UN', us:'미국', both:'UN·미국' };
-
-  const cachedHtml = aiCache[d.name];
-
-  const tab0 = `<div class="tab-pane active">
-    ${!cachedHtml ? `<div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;padding:8px 12px;background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.15);font-family:var(--mono);font-size:10px;color:var(--text2);">
-      <div class="ai-dot loading"></div> AI가 최신 정보를 백그라운드에서 불러오는 중... <span style="color:var(--accent)">(✦ 최신동향 탭에서 확인)</span>
-    </div>` : `<div style="display:flex;align-items:center;gap:7px;margin-bottom:12px;padding:8px 12px;background:rgba(59,255,138,0.04);border:1px solid rgba(59,255,138,0.2);font-family:var(--mono);font-size:10px;color:var(--text2);">
-      <div class="live-dot"></div> AI 최신 정보 로드 완료 — <span style="color:#3bff8a">✦ 최신동향 탭</span>에서 확인하세요
-    </div>`}
-    <div class="overview-summary">${d.summary}</div>
-    <div class="info-block">
-      <div class="info-block-title">// 기본 정보</div>
-      <div class="info-row"><div class="info-key">최초 제재</div><div class="info-val">${d.since}년</div></div>
-      <div class="info-row"><div class="info-key">제재 유형</div><div class="info-val" style="color:${catColor}">${catLabel}</div></div>
-      <div class="info-row"><div class="info-key">위험 등급</div><div class="info-val"><span class="severity-badge ${sevClass}">${sevLabel}</span></div></div>
-      <div class="info-row"><div class="info-key">제재 분야</div><div class="info-val"><div class="sector-tags">${d.sectors.map(s=>`<span class="sector-tag">${s}</span>`).join('')}</div></div></div>
-    </div>
-  </div>`;
-
-  const tab1 = `<div class="tab-pane">
-    ${(d.sanctions||[]).map(s=>`
-      <div class="sanction-block ${s.type}">
-        <div class="sb-header">
-          <div class="sb-icon">${s.type==='un'?'🇺🇳':'🇺🇸'}</div>
-          <div><div class="sb-title">${s.title}</div><div class="sb-subtitle">${s.authority}</div></div>
-        </div>
-        <div class="sb-desc">${s.desc}</div>
-        <div class="sb-details">
-          <div class="sb-detail-row"><div class="sb-detail-key">근거 법령</div><div class="sb-detail-val" style="font-size:11px;font-family:var(--mono);color:var(--text3)">${s.resolutions}</div></div>
-          <div class="sb-detail-row"><div class="sb-detail-key">제재 대상</div><div class="sb-detail-val">${s.targets}</div></div>
-          <div class="sb-detail-row"><div class="sb-detail-key">동결 자산</div><div class="sb-detail-val">${s.frozenAssets}</div></div>
-        </div>
-      </div>`).join('')}
-  </div>`;
-
-  const tab2 = `<div class="tab-pane">
-    <div class="timeline">
-      ${(d.timeline||[]).map(t=>`
-        <div class="tl-item">
-          <div class="tl-dot ${t.type}"></div>
-          <div class="tl-date">${t.date}</div>
-          <div class="tl-title">${t.title}</div>
-          <div class="tl-desc">${t.desc}</div>
-          <span class="tl-issuer" style="color:${typeColor[t.type]};background:${typeBg[t.type]};border:1px solid ${typeColor[t.type]}44">${typeLabel[t.type]}</span>
-        </div>`).join('')}
-    </div>
-  </div>`;
-
-  const tab3 = `<div class="tab-pane">
-    ${(d.sources||[]).map(s=>`
-      <div class="source-item">
-        <div class="source-org">${s.org}</div>
-        <span class="source-type" style="background:rgba(0,212,255,0.08);color:var(--accent);border:1px solid rgba(0,212,255,0.2)">${s.type}</span>
-        <div class="source-desc">${s.desc}</div>
-        <a href="${s.url}" target="_blank" class="source-link">🔗 공식 출처 바로가기 ↗</a>
-      </div>`).join('')}
-    <div class="disclaimer">※ 본 정보는 참고용이며, 실제 제재 준수 여부는 반드시 공식 출처 및 법률 전문가를 통해 확인하시기 바랍니다.</div>
-  </div>`;
-
-  // 탭4: AI 최신 동향 (캐시 있으면 즉시 표시, 없으면 로딩 후 자동 조회)
-  const cachedHtml = aiCache[d.name];
-  const tab4 = `<div class="tab-pane" id="tab-ai">
-    <div class="ai-update-bar">
-      <div class="ai-update-label">
-        <div class="ai-dot" id="ai-dot"></div>
-        <span id="ai-status-label">Claude AI · 웹 검색 기반 실시간 분석</span>
-      </div>
-      <button class="btn-ai-refresh" id="btn-ai-refresh" onclick="fetchLatestSanctions('${d.name}', '${selectedCountry}', true)">
-        <span class="spin">↻</span> 새로고침
-      </button>
-    </div>
-    <div id="ai-result-area">
-      ${cachedHtml || `<div class="ai-loading-box" id="ai-loading">
-        <div class="ai-loading-spinner"></div>
-        <div class="ai-loading-text">${d.name} 최신 제재 동향 검색 중...</div>
-      </div>`}
-    </div>
-  </div>`;
-
-  document.getElementById('drawer-body').innerHTML = tab0 + tab1 + tab2 + tab3 + tab4;
+// ── AI 탭 UI 구성 ──
+function buildAiTab(countryName) {
+  const iso = currentISO;
+  const cached = aiCache[iso];
+  if (cached) {
+    return buildStatusBar(countryName, iso, false) + '<div id="ai-result">' + cached + '</div>';
+  }
+  if (savedKey) {
+    return buildStatusBar(countryName, iso, true) +
+      '<div id="ai-result"><div class="ai-loading"><div class="ai-spinner"></div><div class="ai-loading-txt">'+countryName+' 최신 제재 동향 검색 중...</div></div></div>';
+  }
+  return buildKeyInput(countryName, iso);
 }
 
-// ── AI 최신 제재 동향 조회 ──
-async function fetchLatestSanctions(countryName, iso, forceRefresh) {
-  const btn = document.getElementById('btn-ai-refresh');
-  const dot = document.getElementById('ai-dot');
-  const area = document.getElementById('ai-result-area');
-  const statusLabel = document.getElementById('ai-status-label');
-  if (!area) return;
+function buildKeyInput(countryName, iso) {
+  return '<div class="ai-keybar">'+
+    '<div class="ai-keybar-title">✦ CLAUDE AI · 실시간 웹 검색</div>'+
+    '<div style="font-size:11px;color:var(--txt2);margin-bottom:10px;line-height:1.6;">'+
+      'Anthropic API 키를 입력하면 '+countryName+'의 최신 제재 동향을 AI가 실시간으로 분석합니다.<br>'+
+      '<span style="font-family:var(--mono);font-size:9px;color:var(--txt3)">API 키: <a href="https://console.anthropic.com" target="_blank" style="color:var(--acc)">console.anthropic.com</a> 에서 발급</span>'+
+    '</div>'+
+    '<div class="ai-keybar-row">'+
+      '<input class="ai-keyinput" type="password" id="ai-key-input" placeholder="sk-ant-api03-..." autocomplete="off">'+
+      '<button class="ai-keybtn" onclick="saveKeyAndFetch(\''+countryName+'\',\''+iso+'\')">조회 시작</button>'+
+    '</div>'+
+    '<div style="margin-top:6px;font-family:var(--mono);font-size:8px;color:var(--txt3)">※ 키는 브라우저에 저장되며 외부로 전송되지 않습니다 (API 호출 제외)</div>'+
+  '</div>'+
+  '<div id="ai-result" style="padding:30px 0;text-align:center;color:var(--txt3);font-family:var(--mono);font-size:10px;">API 키를 입력하면 최신 정보를 불러옵니다</div>';
+}
 
-  // 강제 새로고침이면 캐시 삭제
-  if (forceRefresh) delete aiCache[countryName];
+function buildStatusBar(countryName, iso, isLoading) {
+  return '<div class="ai-status-row">'+
+    '<div class="ai-status-left"><div class="ai-pulse'+(isLoading?' spin':'')+'" id="ai-pulse"></div>'+
+    '<span id="ai-status-txt">'+(isLoading?'최신 정보 검색 중...':'Claude AI · 웹 검색 기반 분석')+'</span></div>'+
+    '<button class="ai-refresh-btn'+(isLoading?' spinning':'')+'" id="ai-refresh" onclick="doFetch(\''+countryName+'\',\''+iso+'\',true)" '+(isLoading?'disabled':'')+'>'+
+      '<span class="ai-refresh-ico">↻</span> 새로고침</button>'+
+  '</div>';
+}
 
-  // 이미 캐시 있으면 스킵
-  if (!forceRefresh && aiCache[countryName]) return;
+function saveKeyAndFetch(countryName, iso) {
+  const input = document.getElementById('ai-key-input');
+  if (!input) return;
+  const key = input.value.trim();
+  if (!key.startsWith('sk-ant')) {
+    input.style.borderColor = 'rgba(255,79,79,.6)';
+    input.placeholder = 'sk-ant-api03-... 형식이어야 합니다';
+    return;
+  }
+  savedKey = key;
+  try { localStorage.setItem('sanction_api_key', key); } catch(e) {}
+  const panel = document.getElementById('ai-panel');
+  if (panel) {
+    panel.innerHTML = buildStatusBar(countryName, iso, true) +
+      '<div id="ai-result"><div class="ai-loading"><div class="ai-spinner"></div><div class="ai-loading-txt">'+countryName+' 최신 제재 동향 분석 중...</div></div></div>';
+  }
+  doFetch(countryName, iso, false);
+}
 
-  // 로딩 상태
+function autoFetchIfReady() {
+  if (!currentISO) return;
+  const iso = currentISO;
+  const d = SD[iso];
+  if (!d) return;
+  if (aiCache[iso]) return; // 캐시 있으면 스킵
+  if (!savedKey) return;    // 키 없으면 스킵
+  doFetch(d.name, iso, false);
+}
+
+async function doFetch(countryName, iso, force) {
+  if (!savedKey) { return; }
+  if (force) delete aiCache[iso];
+  if (aiCache[iso]) {
+    // 캐시 있으면 바로 표시
+    const res = document.getElementById('ai-result');
+    if (res) res.innerHTML = aiCache[iso];
+    return;
+  }
+  // UI 로딩 상태
+  const pulse = document.getElementById('ai-pulse');
+  const btn = document.getElementById('ai-refresh');
+  const statusTxt = document.getElementById('ai-status-txt');
+  const resultArea = document.getElementById('ai-result');
+  if (pulse) pulse.classList.add('spin');
   if (btn) { btn.disabled = true; btn.classList.add('spinning'); }
-  if (dot) dot.classList.add('loading');
-  if (statusLabel) statusLabel.textContent = '최신 정보 검색 중...';
-  area.innerHTML = `<div class="ai-loading-box">
-    <div class="ai-loading-spinner"></div>
-    <div class="ai-loading-text">${countryName} 최신 제재 동향 분석 중...</div>
-  </div>`;
+  if (statusTxt) statusTxt.textContent = '최신 정보 검색 중...';
+  if (resultArea) resultArea.innerHTML = '<div class="ai-loading"><div class="ai-spinner"></div><div class="ai-loading-txt">'+countryName+' 최신 제재 동향 분석 중...</div></div>';
 
-  const today = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
-
-  const prompt = `오늘 날짜는 ${today}입니다. 당신은 국제 제재 전문 분석가입니다.
-웹 검색을 활용하여 ${countryName}에 대한 최신 제재 동향을 조사하고 분석해주세요.
-특히 최근 1년 이내의 변화에 집중하되, 중요한 과거 사건도 포함하세요.
-
-반드시 아래 JSON 형식으로만 응답하세요. 마크다운 코드블록 없이 순수 JSON만 출력:
-{
-  "updatedAt": "2026년 3월",
-  "headline": "현재 제재 상황 핵심 요약 2~3문장. 가장 최근 상황을 반영하세요.",
-  "recentNews": [
-    {
-      "date": "2026.02",
-      "title": "구체적인 뉴스 제목",
-      "desc": "2~3문장 상세 설명. 어떤 기관이 어떤 조치를 취했는지 구체적으로.",
-      "type": "신규제재 또는 제재완화 또는 집행조치 또는 정책변화 또는 외교동향",
-      "issuer": "미국 OFAC 또는 EU 또는 UN 안보리 등"
-    }
-  ],
-  "timeline": [
-    {
-      "date": "2026.02",
-      "title": "사건 제목",
-      "desc": "1~2문장 설명",
-      "type": "us 또는 un 또는 both"
-    }
-  ],
-  "keyChanges": ["변화사항1", "변화사항2", "변화사항3"],
-  "complianceAlert": "현재 가장 중요한 컴플라이언스 주의사항 한 문장"
-}
-
-recentNews는 최신 순으로 5~7개, timeline은 최신 순으로 6~8개 포함하세요.
-반드시 실제 검색한 최신 정보만 사용하고, 없으면 알려진 최신 사실을 기반으로 작성하세요.`;
+  const today = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'});
+  const prompt = '오늘은 '+today+'입니다. 국제 제재 전문 분석가로서 '+countryName+'에 대한 최신 제재 동향을 웹 검색으로 조사하세요. 최근 1년 이내 변화에 집중하세요.\n\n순수 JSON만 출력 (```json 등 코드블록 금지):\n{"updatedAt":"2026년 3월","headline":"현재 제재 상황 핵심 요약 2~3문장","recentNews":[{"date":"2026.02","title":"제목","desc":"2~3문장 설명","type":"신규제재|제재완화|집행조치|정책변화|외교동향","issuer":"미국 OFAC|EU|UN 안보리"}],"timeline":[{"date":"2026.02","title":"사건 제목","desc":"1~2문장","type":"us|un|both"}],"keyChanges":["변화1","변화2","변화3"],"complianceAlert":"가장 중요한 주의사항 한 문장"}\n\nrecentNews 5~7개, timeline 6~8개, 최신 순.';
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': savedKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: prompt }]
+        max_tokens: 1500,
+        tools: [{type:'web_search_20250305',name:'web_search'}],
+        messages: [{role:'user', content:prompt}]
       })
     });
 
-    const data = await response.json();
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message || 'API 오류 ('+resp.status+')');
 
-    // 텍스트 블록만 추출
-    const text = (data.content || [])
-      .filter(b => b.type === 'text')
-      .map(b => b.text).join('');
+    const text = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    if (!text) throw new Error('응답 텍스트가 없습니다');
 
-    let parsed;
-    try {
-      const clean = text.replace(/```json|```/g, '').trim();
-      parsed = JSON.parse(clean);
-    } catch(e) {
-      throw new Error('응답 파싱 실패');
-    }
+    const clean = text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+    const m = clean.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('JSON 형식 응답을 찾을 수 없습니다');
+    const parsed = JSON.parse(m[0]);
 
-    const html = renderAiResult(parsed, countryName);
-    aiCache[countryName] = html;
+    const html = buildAiResultHtml(parsed);
+    aiCache[iso] = html;
 
-    const resultArea = document.getElementById('ai-result-area');
-    if (resultArea) resultArea.innerHTML = html;
-    if (statusLabel) statusLabel.textContent = `마지막 업데이트: ${parsed.updatedAt || today}`;
-
-    // 제재 일지 탭도 최신 타임라인으로 교체
-    if (parsed.timeline && parsed.timeline.length > 0) {
-      const typeColor = { un:'var(--un-color)', us:'var(--us-color)', both:'var(--both-color)' };
-      const typeBg = { un:'rgba(59,158,255,0.1)', us:'rgba(255,79,79,0.1)', both:'rgba(196,77,255,0.1)' };
-      const typeLabel = { un:'UN', us:'미국', both:'UN·미국' };
-      const tlPane = document.querySelector('#drawer-body .tab-pane:nth-child(3)');
-      if (tlPane) {
-        tlPane.innerHTML = `
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;padding:8px 10px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.2);">
-            <span style="font-size:9px;font-family:var(--mono);color:var(--accent)">✦ AI가 최신 정보로 업데이트함 · ${parsed.updatedAt}</span>
-          </div>
-          <div class="timeline">
-            ${parsed.timeline.map(t => `
-              <div class="tl-item">
-                <div class="tl-dot ${t.type || 'us'}"></div>
-                <div class="tl-date">${t.date}</div>
-                <div class="tl-title">${t.title}</div>
-                <div class="tl-desc">${t.desc}</div>
-                <span class="tl-issuer" style="color:${typeColor[t.type]||typeColor.us};background:${typeBg[t.type]||typeBg.us};border:1px solid ${typeColor[t.type]||typeColor.us}44">${typeLabel[t.type]||'제재'}</span>
-              </div>`).join('')}
-          </div>`;
-      }
+    if (currentISO === iso) {
+      const res2 = document.getElementById('ai-result');
+      if (res2) res2.innerHTML = html;
+      const st = document.getElementById('ai-status-txt');
+      if (st) st.textContent = '마지막 업데이트: '+(parsed.updatedAt||today);
+      // 제재 일지 탭도 갱신
+      if (parsed.timeline && parsed.timeline.length > 0) updateTimeline(parsed.timeline, parsed.updatedAt||today);
     }
 
   } catch(err) {
-    const resultArea = document.getElementById('ai-result-area');
-    if (resultArea) resultArea.innerHTML = `
-      <div style="padding:20px; background:rgba(255,79,79,0.05); border:1px solid rgba(255,79,79,0.2); font-size:12px; color:var(--text2); line-height:1.6;">
-        <div style="color:var(--us-color); font-family:var(--mono); font-size:10px; margin-bottom:8px;">⚠ 조회 실패</div>
-        ${err.message === '응답 파싱 실패' ? '일시적인 오류가 발생했습니다. 잠시 후 새로고침을 시도해주세요.' : '네트워크 연결을 확인하고 다시 시도해주세요.'}
-        <br><br>
-        <button onclick="fetchLatestSanctions('${countryName}', '${iso}', true)" style="padding:5px 14px; background:transparent; border:1px solid var(--border2); color:var(--text2); font-family:var(--mono); font-size:10px; cursor:pointer;">↻ 다시 시도</button>
-      </div>`;
-    if (statusLabel) statusLabel.textContent = 'Claude AI · 웹 검색 기반 실시간 분석';
+    console.error('AI 오류:', err);
+    if (currentISO === iso) {
+      const res3 = document.getElementById('ai-result');
+      if (res3) res3.innerHTML =
+        '<div class="ai-error">'+
+          '<div class="ai-error-title">⚠ 조회 실패</div>'+
+          '<div class="ai-error-msg">'+err.message+'<br><br>API 키가 올바른지 확인 후 새로고침 버튼을 눌러주세요.</div>'+
+          '<button class="ai-retry-btn" onclick="doFetch(\''+countryName+'\',\''+iso+'\',true)">↻ 다시 시도</button>'+
+        '</div>';
+      const st2 = document.getElementById('ai-status-txt');
+      if (st2) st2.textContent = '오류 발생 — 새로고침 버튼 클릭';
+    }
   } finally {
-    const b = document.getElementById('btn-ai-refresh');
-    const d2 = document.getElementById('ai-dot');
-    if (b) { b.disabled = false; b.classList.remove('spinning'); }
-    if (d2) d2.classList.remove('loading');
+    if (currentISO === iso) {
+      const p2 = document.getElementById('ai-pulse');
+      const b2 = document.getElementById('ai-refresh');
+      if (p2) p2.classList.remove('spin');
+      if (b2) { b2.disabled = false; b2.classList.remove('spinning'); }
+    }
   }
 }
 
-function renderAiResult(data, countryName) {
-  const typeStyle = {
-    '신규제재':   { color:'var(--us-color)',   bg:'rgba(255,79,79,0.1)',   border:'rgba(255,79,79,0.3)' },
-    '제재완화':   { color:'var(--un-color)',   bg:'rgba(59,158,255,0.1)', border:'rgba(59,158,255,0.3)' },
-    '집행조치':   { color:'var(--both-color)', bg:'rgba(196,77,255,0.1)', border:'rgba(196,77,255,0.3)' },
-    '정책변화':   { color:'var(--accent3,#ffd60a)', bg:'rgba(255,214,10,0.1)', border:'rgba(255,214,10,0.3)' },
-    '외교동향':   { color:'var(--accent)',     bg:'rgba(0,212,255,0.08)', border:'rgba(0,212,255,0.2)' },
+function buildAiResultHtml(data) {
+  const ts = {
+    '신규제재': {col:'var(--us)',bg:'rgba(255,79,79,.1)',bor:'rgba(255,79,79,.3)'},
+    '제재완화': {col:'var(--un)',bg:'rgba(59,158,255,.1)',bor:'rgba(59,158,255,.3)'},
+    '집행조치': {col:'var(--both)',bg:'rgba(196,77,255,.1)',bor:'rgba(196,77,255,.3)'},
+    '정책변화': {col:'#ffd60a',bg:'rgba(255,214,10,.1)',bor:'rgba(255,214,10,.3)'},
+    '외교동향': {col:'var(--acc)',bg:'rgba(0,212,255,.08)',bor:'rgba(0,212,255,.25)'}
   };
-
-  const newsHtml = (data.recentNews || []).map(n => {
-    const ts = typeStyle[n.type] || typeStyle['외교동향'];
-    return `<div class="ai-news-item">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-        <div class="ai-news-date">${n.date} · ${n.issuer}</div>
-        <span class="ai-tag" style="color:${ts.color};background:${ts.bg};border:1px solid ${ts.border}">${n.type}</span>
-      </div>
-      <div class="ai-news-title">${n.title}</div>
-      <div class="ai-news-desc">${n.desc}</div>
-    </div>`;
+  var newsHtml = (data.recentNews||[]).map(function(n){
+    var s = ts[n.type]||ts['외교동향'];
+    return '<div class="ai-news">'+
+      '<div class="ai-news-hd">'+
+        '<span class="ai-news-meta">'+n.date+' · '+n.issuer+'</span>'+
+        '<span class="ai-ntag" style="color:'+s.col+';background:'+s.bg+';border:1px solid '+s.bor+'">'+n.type+'</span>'+
+      '</div>'+
+      '<div class="ai-news-ttl">'+n.title+'</div>'+
+      '<div class="ai-news-desc">'+n.desc+'</div>'+
+    '</div>';
   }).join('');
 
-  const changesHtml = (data.keyChanges || []).map(c =>
-    `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text2);">
-      <span style="color:var(--accent);font-family:var(--mono);flex-shrink:0;">→</span>${c}
-    </div>`
-  ).join('');
-
-  return `
-    <div class="ai-section">
-      <div class="ai-section-title">// 현황 요약</div>
-      <div style="font-size:13px;color:var(--text2);line-height:1.75;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);">
-        ${data.headline}
-      </div>
-    </div>
-    <div class="ai-section">
-      <div class="ai-section-title">// 최신 뉴스 & 동향</div>
-      ${newsHtml}
-    </div>
-    ${data.keyChanges?.length ? `
-    <div class="ai-section">
-      <div class="ai-section-title">// 주요 변화사항</div>
-      <div style="background:var(--surface2);border:1px solid var(--border);padding:4px 14px;">${changesHtml}</div>
-    </div>` : ''}
-    ${data.complianceAlert ? `
-    <div style="padding:12px 14px;background:rgba(255,79,79,0.05);border:1px solid rgba(255,79,79,0.2);border-left:3px solid var(--us-color);margin-bottom:16px;">
-      <div style="font-family:var(--mono);font-size:9px;color:var(--us-color);letter-spacing:0.15em;margin-bottom:5px;">⚠ COMPLIANCE ALERT</div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.6;">${data.complianceAlert}</div>
-    </div>` : ''}
-    <div class="ai-updated-at">✦ Claude AI + Web Search · ${data.updatedAt}</div>
-    <div class="disclaimer">※ AI 분석 결과는 참고용입니다. 실제 제재 준수 여부는 반드시 공식 출처와 법률 전문가를 통해 확인하세요.</div>`;
-}
-
-// ── 사이드바 ──
-function buildList() {
-  const list = document.getElementById('country-list');
-  const sorted = Object.entries(sanctionData).sort((a,b) => {
-    const o = {both:0,un:1,us:2};
-    return o[getCategory(a[1])] - o[getCategory(b[1])] || a[1].name.localeCompare(b[1].name,'ko');
-  });
-  list.innerHTML = sorted.map(([iso,d]) => {
-    const vis = isVisible(d);
-    return `<div class="country-item${selectedCountry===iso?' selected':''}" id="li-${iso}" onclick="openDrawer('${iso}')" style="${vis?'':'opacity:0.2;pointer-events:none'}">
-      <span class="country-flag">${d.flag}</span>
-      <span>${d.name}</span>
-      <span class="country-badges">${d.un?'<span class="badge badge-un">UN</span>':''}${d.us?'<span class="badge badge-us">US</span>':''}</span>
-    </div>`;
+  var changesHtml = (data.keyChanges||[]).map(function(c){
+    return '<div class="ai-changes-item"><span class="ai-changes-arrow">→</span>'+c+'</div>';
   }).join('');
-  const total = Object.values(sanctionData);
-  document.getElementById('un-count').textContent = total.filter(d=>d.un).length;
-  document.getElementById('us-count').textContent = total.filter(d=>d.us).length;
-  document.getElementById('both-count').textContent = total.filter(d=>d.un&&d.us).length;
-  document.getElementById('fc-both').textContent = total.filter(d=>d.un&&d.us).length;
-  document.getElementById('fc-un').textContent = total.filter(d=>d.un&&!d.us).length;
-  document.getElementById('fc-us').textContent = total.filter(d=>!d.un&&d.us).length;
-  document.getElementById('visible-count').textContent = total.filter(d=>isVisible(d)).length;
+
+  var alertHtml = data.complianceAlert
+    ? '<div class="ai-alert"><div class="ai-alert-lbl">⚠ COMPLIANCE ALERT</div><div class="ai-alert-txt">'+data.complianceAlert+'</div></div>'
+    : '';
+
+  return '<div class="ai-sec">'+
+    '<div class="ai-sec-ttl">// 현황 요약</div>'+
+    '<div class="ai-headline">'+data.headline+'</div>'+
+  '</div>'+
+  '<div class="ai-sec">'+
+    '<div class="ai-sec-ttl">// 최신 뉴스 & 동향</div>'+
+    newsHtml+
+  '</div>'+
+  (changesHtml ? '<div class="ai-sec"><div class="ai-sec-ttl">// 주요 변화사항</div><div style="background:var(--sur2);border:1px solid var(--bor);padding:4px 12px;">'+changesHtml+'</div></div>' : '')+
+  alertHtml+
+  '<div class="ai-updated">✦ Claude AI + Web Search · '+(data.updatedAt||'')+'</div>'+
+  '<div class="disclaimer">※ AI 분석 결과는 참고용입니다. 실제 제재 준수는 반드시 공식 출처와 법률 전문가를 통해 확인하세요.</div>';
 }
 
-function setFilter(type) {
-  activeFilters[type] = !activeFilters[type];
-  document.getElementById(`btn-${type}`).classList.toggle('active', activeFilters[type]);
-  updateMapColors(); buildList();
-}
-function setView(v) {
-  currentView = v;
-  document.querySelectorAll('.vt-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(`vt-${v==='all'?'all':v==='un_only'?'un':'us'}`).classList.add('active');
-  updateMapColors(); buildList();
+function updateTimeline(tlData, updatedAt) {
+  const pane = document.getElementById('tab-timeline');
+  if (!pane) return;
+  const tc = {un:'var(--un)',us:'var(--us)',both:'var(--both)'};
+  const tb = {un:'rgba(59,158,255,.1)',us:'rgba(255,79,79,.1)',both:'rgba(196,77,255,.1)'};
+  const tl = {un:'UN',us:'미국',both:'UN·미국'};
+  pane.innerHTML =
+    '<div class="tl-header ai-updated"><div class="live-dot"></div>AI가 최신 정보로 업데이트 · '+updatedAt+'</div>'+
+    '<div class="timeline">'+
+      tlData.map(function(t){
+        return '<div class="tl-item">'+
+          '<div class="tl-dot '+(t.type||'us')+'"></div>'+
+          '<div class="tl-date">'+t.date+'</div>'+
+          '<div class="tl-ttl">'+t.title+'</div>'+
+          '<div class="tl-desc">'+t.desc+'</div>'+
+          '<span class="tl-tag" style="color:'+(tc[t.type]||tc.us)+';background:'+(tb[t.type]||tb.us)+';border:1px solid '+(tc[t.type]||tc.us)+'44">'+(tl[t.type]||'제재')+'</span>'+
+        '</div>';
+      }).join('')+
+    '</div>';
 }
 
-// ── D3 MAP ──
-const svg = d3.select('#map-svg');
-let projection, path, zoom, g;
-const numToAlpha3 = {"408":"PRK","364":"IRN","729":"SDN","706":"SOM","180":"COD","140":"CAF","466":"MLI","624":"GNB","434":"LBY","887":"YEM","728":"SSD","332":"HTI","324":"GIN","232":"ERI","192":"CUB","760":"SYR","643":"RUS","112":"BLR","104":"MMR","862":"VEN","558":"NIC","716":"ZWE"};
+// ── D3 지도 ──
+const mapSvg = d3.select('#map-svg');
+let proj, pathFn, zoom, g;
+const N2A={"408":"PRK","364":"IRN","729":"SDN","706":"SOM","180":"COD","140":"CAF","466":"MLI","624":"GNB","434":"LBY","887":"YEM","728":"SSD","332":"HTI","324":"GIN","232":"ERI","192":"CUB","760":"SYR","643":"RUS","112":"BLR","104":"MMR","862":"VEN","558":"NIC","716":"ZWE"};
 
-function initMap() {
+function initMap(){
   const W = document.getElementById('map-area').clientWidth;
   const H = document.getElementById('map-area').clientHeight;
-  projection = d3.geoNaturalEarth1().scale(W/6.1).translate([W/2,H/2]);
-  path = d3.geoPath().projection(projection);
-  zoom = d3.zoom().scaleExtent([0.5,10]).on('zoom', e=>g.attr('transform',e.transform));
-  svg.attr('width',W).attr('height',H).call(zoom);
-  svg.append('rect').attr('width',W).attr('height',H).attr('fill','#07090e');
-  g = svg.append('g');
-  g.append('path').datum(d3.geoGraticule()()).attr('d',path).attr('fill','none').attr('stroke','#0d1825').attr('stroke-width',0.4);
+  proj = d3.geoNaturalEarth1().scale(W/6.1).translate([W/2, H/2]);
+  pathFn = d3.geoPath().projection(proj);
+  zoom = d3.zoom().scaleExtent([.5,10]).on('zoom', function(e){ g.attr('transform',e.transform); });
+  mapSvg.attr('width',W).attr('height',H).call(zoom);
+  mapSvg.append('rect').attr('width',W).attr('height',H).attr('fill','#07090e');
+  g = mapSvg.append('g');
+  g.append('path').datum(d3.geoGraticule()()).attr('d',pathFn).attr('fill','none').attr('stroke','#0d1825').attr('stroke-width',.4);
   fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
-    .then(r=>r.json())
-    .then(world=>{
-      const countries = topojson.feature(world, world.objects.countries);
-      const tooltip = document.getElementById('tooltip');
-      g.selectAll('.country-path').data(countries.features).enter().append('path')
-        .attr('class', d=>{ const iso=numToAlpha3[d.id]; const sd=iso?sanctionData[iso]:null; return `country-path ${getCategory(sd)}-sanction`; })
-        .attr('id', d=>{ const iso=numToAlpha3[d.id]; return iso?`c-${iso}`:null; })
-        .attr('d', path)
-        .on('mousemove', function(event,d){
-          const iso=numToAlpha3[d.id]; const sd=iso?sanctionData[iso]:null;
-          if(!sd){tooltip.classList.remove('show');return;}
-          const cat=getCategory(sd);
-          const cc={both:'var(--both-color)',un:'var(--un-color)',us:'var(--us-color)'}[cat];
-          document.getElementById('tt-name').textContent=`${sd.flag} ${sd.name}`;
-          document.getElementById('tt-badges').innerHTML=`${sd.un?'<span class="badge badge-un">UN</span>':''}${sd.us?'<span class="badge badge-us">US</span>':''}`;
-          document.getElementById('tt-desc').innerHTML=`<span style="color:${cc}">${cat==='both'?'UN + 미국 동시':cat==='un'?'UN 단독':'미국 단독'}</span><br>${sd.sectors.slice(0,3).join(' · ')}`;
-          const rect=document.getElementById('map-area').getBoundingClientRect();
-          let x=event.clientX-rect.left+14, y=event.clientY-rect.top-10;
-          if(x+230>rect.width) x-=244;
-          tooltip.style.left=x+'px'; tooltip.style.top=y+'px'; tooltip.classList.add('show');
+    .then(function(r){return r.json();})
+    .then(function(world){
+      const feats = topojson.feature(world, world.objects.countries);
+      const tip = document.getElementById('tip');
+      g.selectAll('.country-path').data(feats.features).enter().append('path')
+        .attr('class', function(d){ const iso=N2A[d.id]; const sd=iso?SD[iso]:null; return 'country-path '+getCat(sd)+'-sanction'; })
+        .attr('id', function(d){ const iso=N2A[d.id]; return iso?'cp-'+iso:null; })
+        .attr('d', pathFn)
+        .on('mousemove', function(ev,d){
+          const iso=N2A[d.id]; const sd=iso?SD[iso]:null;
+          if(!sd){ tip.classList.remove('show'); return; }
+          const c=getCat(sd);
+          const cc={both:'var(--both)',un:'var(--un)',us:'var(--us)'}[c];
+          document.getElementById('tt-name').textContent=sd.flag+' '+sd.name;
+          document.getElementById('tt-badges').innerHTML=(sd.un?'<span class="badge badge-un">UN</span>':'')+(sd.us?'<span class="badge badge-us">US</span>':'');
+          document.getElementById('tt-desc').innerHTML='<span style="color:'+cc+'">'+(c==='both'?'UN+미국':c==='un'?'UN 단독':'미국 단독')+'</span><br>'+sd.sectors.slice(0,3).join(' · ');
+          const r=document.getElementById('map-area').getBoundingClientRect();
+          let x=ev.clientX-r.left+14, y=ev.clientY-r.top-10;
+          if(x+220>r.width) x-=234;
+          tip.style.left=x+'px'; tip.style.top=y+'px'; tip.classList.add('show');
         })
-        .on('mouseleave',()=>tooltip.classList.remove('show'))
-        .on('click',(event,d)=>{ const iso=numToAlpha3[d.id]; if(iso&&sanctionData[iso]) openDrawer(iso); });
-      updateMapColors();
-    }).catch(()=>{
-      g.append('text').attr('x',100).attr('y',100).attr('fill','#6b7a99').attr('font-size',14).text('지도 데이터 로드 오류 — 인터넷 연결을 확인하세요');
+        .on('mouseleave', function(){ document.getElementById('tip').classList.remove('show'); })
+        .on('click', function(ev,d){ const iso=N2A[d.id]; if(iso&&SD[iso]) openDrawer(iso); });
+      updateColors();
+    })
+    .catch(function(){
+      g.append('text').attr('x',100).attr('y',100).attr('fill','#6b7a99').attr('font-size',13).text('지도 데이터 로드 오류');
     });
 }
 
-function updateMapColors() {
+function updateColors(){
   d3.selectAll('.country-path').each(function(d){
-    const iso=d?numToAlpha3[d.id]:null; const sd=iso?sanctionData[iso]:null;
-    const vis=sd&&isVisible(sd); const cat=getCategory(sd);
-    this.className.baseVal=`country-path ${vis?cat:'neutral'}-sanction`;
-    if(iso===selectedCountry&&vis) this.classList.add('highlighted');
+    const iso=d?N2A[d.id]:null; const sd=iso?SD[iso]:null;
+    const vis=sd&&isVis(sd); const cat=getCat(sd);
+    this.className.baseVal='country-path '+(vis?cat:'neutral')+'-sanction';
+    if(iso===currentISO&&vis) this.classList.add('hl');
   });
 }
 
-function zoomIn(){svg.transition().call(zoom.scaleBy,1.5);}
-function zoomOut(){svg.transition().call(zoom.scaleBy,0.67);}
-function resetZoom(){svg.transition().call(zoom.transform,d3.zoomIdentity);}
+function zoomIn(){ mapSvg.transition().call(zoom.scaleBy, 1.5); }
+function zoomOut(){ mapSvg.transition().call(zoom.scaleBy, .67); }
+function resetZoom(){ mapSvg.transition().call(zoom.transform, d3.zoomIdentity); }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeDrawer(); });
 buildList();
-window.addEventListener('load',initMap);
-window.addEventListener('resize',()=>{
-  const W=document.getElementById('map-area').clientWidth, H=document.getElementById('map-area').clientHeight;
-  svg.attr('width',W).attr('height',H);
-  projection.scale(W/6.1).translate([W/2,H/2]);
-  path=d3.geoPath().projection(projection);
-  d3.selectAll('.country-path').attr('d',path);
+window.addEventListener('load', initMap);
+window.addEventListener('resize', function(){
+  const W=document.getElementById('map-area').clientWidth;
+  const H=document.getElementById('map-area').clientHeight;
+  mapSvg.attr('width',W).attr('height',H);
+  proj.scale(W/6.1).translate([W/2,H/2]);
+  pathFn=d3.geoPath().projection(proj);
+  d3.selectAll('.country-path').attr('d',pathFn);
 });
 </script>
 </body>
