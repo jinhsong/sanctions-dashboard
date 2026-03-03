@@ -996,7 +996,7 @@ recentNews 4~6개, timeline 5~7개, 최신 순으로 정렬.`;
 
   try {
     const resp = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro:generateContent?key=' + savedKey,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent?key=' + savedKey,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
