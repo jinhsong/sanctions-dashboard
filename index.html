@@ -693,7 +693,7 @@ const aiCache = {};
 let savedKey = '';
 
 // localStorage에서 키 복원 (GitHub Pages 배포용)
-try { savedKey = localStorage.getItem('sanction_api_key') || ''; } catch(e) {}
+try { savedKey = localStorage.getItem('sanction_gemini_key') || ''; } catch(e) {}
 
 function getCat(d){ if(!d) return 'neutral'; if(d.un&&d.us) return 'both'; if(d.un) return 'un'; if(d.us) return 'us'; return 'neutral'; }
 function isVis(d){ if(!d) return false; const c=getCat(d); if(view==='un_only'&&!d.un) return false; if(view==='us_only'&&!d.us) return false; if(c==='neutral') return false; if(!filters[c==='both'?'both':c==='un'?'un':'us']) return false; return true; }
@@ -855,13 +855,13 @@ function buildAiTab(countryName) {
 
 function buildKeyInput(countryName, iso) {
   return '<div class="ai-keybar">'+
-    '<div class="ai-keybar-title">✦ CLAUDE AI · 실시간 웹 검색</div>'+
+    '<div class="ai-keybar-title">✦ GEMINI AI · Google 검색 기반 실시간 분석</div>'+
     '<div style="font-size:11px;color:var(--txt2);margin-bottom:10px;line-height:1.6;">'+
-      'Anthropic API 키를 입력하면 '+countryName+'의 최신 제재 동향을 AI가 실시간으로 분석합니다.<br>'+
-      '<span style="font-family:var(--mono);font-size:9px;color:var(--txt3)">API 키: <a href="https://console.anthropic.com" target="_blank" style="color:var(--acc)">console.anthropic.com</a> 에서 발급</span>'+
+      'Google Gemini API 키를 입력하면 '+countryName+'의 최신 제재 동향을 실시간으로 분석합니다.<br>'+
+      '<span style="font-family:var(--mono);font-size:9px;color:var(--txt3)">API 키: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--acc)">aistudio.google.com/apikey</a> 에서 발급 (무료)</span>'+
     '</div>'+
     '<div class="ai-keybar-row">'+
-      '<input class="ai-keyinput" type="password" id="ai-key-input" placeholder="sk-ant-api03-..." autocomplete="off">'+
+      '<input class="ai-keyinput" type="password" id="ai-key-input" placeholder="AIza..." autocomplete="off">'+
       '<button class="ai-keybtn" onclick="saveKeyAndFetch(\''+countryName+'\',\''+iso+'\')">조회 시작</button>'+
     '</div>'+
     '<div style="margin-top:6px;font-family:var(--mono);font-size:8px;color:var(--txt3)">※ 키는 브라우저에 저장되며 외부로 전송되지 않습니다 (API 호출 제외)</div>'+
@@ -882,13 +882,13 @@ function saveKeyAndFetch(countryName, iso) {
   const input = document.getElementById('ai-key-input');
   if (!input) return;
   const key = input.value.trim();
-  if (!key.startsWith('sk-ant')) {
+  if (!key.startsWith('AIza') || key.length < 20) {
     input.style.borderColor = 'rgba(255,79,79,.6)';
-    input.placeholder = 'sk-ant-api03-... 형식이어야 합니다';
+    input.placeholder = 'AIza... 형식이어야 합니다 (Google AI Studio)';
     return;
   }
   savedKey = key;
-  try { localStorage.setItem('sanction_api_key', key); } catch(e) {}
+  try { localStorage.setItem('sanction_gemini_key', key); } catch(e) {}
   const panel = document.getElementById('ai-panel');
   if (panel) {
     panel.innerHTML = buildStatusBar(countryName, iso, true) +
@@ -995,26 +995,25 @@ type 값 규칙: recentNews는 "신규제재" "제재완화" "집행조치" "정
 recentNews 4~6개, timeline 5~7개, 최신 순으로 정렬.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': savedKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        tools: [{type:'web_search_20250305',name:'web_search'}],
-        messages: [{role:'user', content:prompt}]
-      })
-    });
+    const resp = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro:generateContent?key=' + savedKey,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          tools: [{ google_search: {} }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+        })
+      }
+    );
 
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message || 'API 오류 ('+resp.status+')');
 
-    const text = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    const text = (data.candidates?.[0]?.content?.parts||[])
+      .filter(function(p){ return p.text; })
+      .map(function(p){ return p.text; }).join('');
     if (!text) throw new Error('응답 텍스트가 없습니다');
 
     // JSON 추출 및 복구 시도
@@ -1116,7 +1115,7 @@ function buildAiResultHtml(data) {
   '</div>'+
   (changesHtml ? '<div class="ai-sec"><div class="ai-sec-ttl">// 주요 변화사항</div><div style="background:var(--sur2);border:1px solid var(--bor);padding:4px 12px;">'+changesHtml+'</div></div>' : '')+
   alertHtml+
-  '<div class="ai-updated">✦ Claude AI + Web Search · '+(data.updatedAt||'')+'</div>'+
+  '<div class="ai-updated">✦ Gemini AI + Google Search · '+(data.updatedAt||'')+'</div>'+
   '<div class="disclaimer">※ AI 분석 결과는 참고용입니다. 실제 제재 준수는 반드시 공식 출처와 법률 전문가를 통해 확인하세요.</div>';
 }
 
